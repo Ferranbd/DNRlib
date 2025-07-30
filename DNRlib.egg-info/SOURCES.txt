@@ -1,0 +1,6 @@
+README.rst
+setup.py
+DNRlib.egg-info/PKG-INFO
+DNRlib.egg-info/SOURCES.txt
+DNRlib.egg-info/dependency_links.txt
+DNRlib.egg-info/top_level.txt

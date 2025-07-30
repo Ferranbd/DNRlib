@@ -1,0 +1,16 @@
+# DNRlib.toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DNRlib"  
+version = "0.1.0"
+# You can add more metadata here, like:
+description = "Distribution Network Reconfiguration methods library"
+readme = "README.rst"
+# requires-python = ">=3.8"
+# dependencies = [
+#   "requests",
+#   "numpy",
+# ]
