@@ -30,7 +30,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
-    'sphinx_autodoc_typehints', # For better type hint rendering
+    #'sphinx_autodoc_typehints', # For better type hint rendering
 ]
 
 # Optional: Configure intersphinx for linking to other projects' docs
