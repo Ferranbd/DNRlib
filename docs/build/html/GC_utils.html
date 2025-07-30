@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_utils module &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="GC_PandaPowerImporter module" href="GC_PandaPowerImporter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_utils module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.CheckRadialConnectedNetwork"><code class="docutils literal notranslate"><span class="pre">CheckRadialConnectedNetwork()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.EdgeCycles"><code class="docutils literal notranslate"><span class="pre">EdgeCycles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC2Graph"><code class="docutils literal notranslate"><span class="pre">GC2Graph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GCNC_CreateBranchDF"><code class="docutils literal notranslate"><span class="pre">GCNC_CreateBranchDF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GCNC_CreateBusDF"><code class="docutils literal notranslate"><span class="pre">GCNC_CreateBusDF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GCNC_GenerateNC"><code class="docutils literal notranslate"><span class="pre">GCNC_GenerateNC()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_FitnessCalculation"><code class="docutils literal notranslate"><span class="pre">GC_FitnessCalculation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_Line_Name2idtag_array"><code class="docutils literal notranslate"><span class="pre">GC_Line_Name2idtag_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_Line_Name2idtag_single"><code class="docutils literal notranslate"><span class="pre">GC_Line_Name2idtag_single()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_Line_idtag2name_array"><code class="docutils literal notranslate"><span class="pre">GC_Line_idtag2name_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_Line_idtag2name_single"><code class="docutils literal notranslate"><span class="pre">GC_Line_idtag2name_single()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.GC_PowerFlow"><code class="docutils literal notranslate"><span class="pre">GC_PowerFlow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.Graph2GC"><code class="docutils literal notranslate"><span class="pre">Graph2GC()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.LinesOutofService"><code class="docutils literal notranslate"><span class="pre">LinesOutofService()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.NetworkReconfiguration"><code class="docutils literal notranslate"><span class="pre">NetworkReconfiguration()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.SearchLoopsLines"><code class="docutils literal notranslate"><span class="pre">SearchLoopsLines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.find_value_in_arrays"><code class="docutils literal notranslate"><span class="pre">find_value_in_arrays()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.list_belongs_to_list_of_lists"><code class="docutils literal notranslate"><span class="pre">list_belongs_to_list_of_lists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.remove_duplicates"><code class="docutils literal notranslate"><span class="pre">remove_duplicates()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.remove_repeated_elements"><code class="docutils literal notranslate"><span class="pre">remove_repeated_elements()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_utils.substitute_value"><code class="docutils literal notranslate"><span class="pre">substitute_value()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GC_utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/GC_utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-GC_utils">
+<span id="gc-utils-module"></span><h1>GC_utils module<a class="headerlink" href="#module-GC_utils" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.CheckRadialConnectedNetwork">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">CheckRadialConnectedNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#CheckRadialConnectedNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.CheckRadialConnectedNetwork" title="Link to this definition"></a></dt>
+<dd><p>Check if the network is both radial and connected.</p>
+<p>This method verifies if the network represented by the graph is a radial network
+and whether it is connected. A radial network is defined as a tree structure
+(i.e., acyclic and connected).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>A tuple containing three boolean values:</dt><dd><ul class="simple">
+<li><p>RadialConnected (bool): True if the network is both radial and connected, False otherwise.</p></li>
+<li><p>connected (bool): True if the network is connected, False otherwise.</p></li>
+<li><p>radial (bool): True if the network is a tree (radial), False otherwise.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.EdgeCycles">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">EdgeCycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#EdgeCycles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.EdgeCycles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC2Graph">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC2Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idtag_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC2Graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC2Graph" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GCNC_CreateBranchDF">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GCNC_CreateBranchDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GCNC_CreateBranchDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GCNC_CreateBranchDF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GCNC_CreateBusDF">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GCNC_CreateBusDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GCNC_CreateBusDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GCNC_CreateBusDF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GCNC_GenerateNC">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GCNC_GenerateNC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GCNC_GenerateNC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GCNC_GenerateNC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_FitnessCalculation">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_FitnessCalculation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalLoad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voltage_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_FitnessCalculation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_FitnessCalculation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_Line_Name2idtag_array">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_Line_Name2idtag_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LineNames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_Line_Name2idtag_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_Line_Name2idtag_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_Line_Name2idtag_single">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_Line_Name2idtag_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LineName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_Line_Name2idtag_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_Line_Name2idtag_single" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_Line_idtag2name_array">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_Line_idtag2name_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idtags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_Line_idtag2name_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_Line_idtag2name_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_Line_idtag2name_single">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_Line_idtag2name_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idtag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_Line_idtag2name_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_Line_idtag2name_single" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.GC_PowerFlow">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">GC_PowerFlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#GC_PowerFlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.GC_PowerFlow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.Graph2GC">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">Graph2GC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#Graph2GC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.Graph2GC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.LinesOutofService">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">LinesOutofService</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#LinesOutofService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.LinesOutofService" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.NetworkReconfiguration">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">NetworkReconfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#NetworkReconfiguration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.NetworkReconfiguration" title="Link to this definition"></a></dt>
+<dd><p>Network reconfiguration : sets the line state to on/off depending on the arguments. The changes are applied to the DistributionNetwork structure, to the internal graph and to the original source of information (openDSS, GridCal, PandaPower)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all=False</strong> – if True all the lines will be set to the value in “value_all”, if False the line status will remain as it is.</p></li>
+<li><p><strong>selected_configuration=None</strong> – if different of None, the values in this list will be set to the value in “value_configuration”</p></li>
+<li><p><strong>value_configuration=False</strong></p></li>
+<li><p><strong>value_all=False</strong></p></li>
+<li><p><strong>extraData=True</strong> – this atributte indicates if the functions :DistributionNetwork2Graph(), LinesOutService() and NetworkSummary() will be called</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.SearchLoopsLines">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">SearchLoopsLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flagUsed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#SearchLoopsLines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.SearchLoopsLines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.find_value_in_arrays">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">find_value_in_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#find_value_in_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.find_value_in_arrays" title="Link to this definition"></a></dt>
+<dd><p>Finds the index and array containing a specific value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – A list of arrays to search.</p></li>
+<li><p><strong>value</strong> – The value to search for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the index of the array (if found) and the array itself, or None if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.list_belongs_to_list_of_lists">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">list_belongs_to_list_of_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_to_check</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#list_belongs_to_list_of_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.list_belongs_to_list_of_lists" title="Link to this definition"></a></dt>
+<dd><p>Checks if the given list is a subset of any list within a list of lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_to_check</strong> – The list to check.</p></li>
+<li><p><strong>list_of_lists</strong> – The list of lists to check against.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the list is a subset of any list in the list of lists, otherwise False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.remove_duplicates">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">remove_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#remove_duplicates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.remove_duplicates" title="Link to this definition"></a></dt>
+<dd><p>Removes duplicate items from each sublist in a list of lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>list_of_lists</strong> – The list of lists from which to remove duplicates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified list of lists with duplicates removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.remove_repeated_elements">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">remove_repeated_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#remove_repeated_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.remove_repeated_elements" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_utils.substitute_value">
+<span class="sig-prename descclassname"><span class="pre">GC_utils.</span></span><span class="sig-name descname"><span class="pre">substitute_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_utils.html#substitute_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_utils.substitute_value" title="Link to this definition"></a></dt>
+<dd><p>Substitutes a value in an array with a new value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – The array to modify.</p></li>
+<li><p><strong>old_value</strong> – The value to be replaced.</p></li>
+<li><p><strong>new_value</strong> – The new value to replace with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified array with the old value replaced.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GC_PandaPowerImporter.html" class="btn btn-neutral float-left" title="GC_PandaPowerImporter module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

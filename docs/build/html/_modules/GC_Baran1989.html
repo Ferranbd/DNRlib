@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_Baran1989 &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_Baran1989</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_Baran1989</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+
+<span class="c1"># Add the directory containing utility_script.py to the Python path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">)))</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+<span class="c1">## based on baran 1989</span>
+<div class="viewcode-block" id="Baran1989">
+<a class="viewcode-back" href="../GC_Baran1989.html#GC_Baran1989.Baran1989">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Baran1989</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for solving the Baran 1989 test feeder network problem.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        net (DistributionNetwork): The distribution network object.</span>
+<span class="sd">        initial_config (list, optional): The initial tie line configuration. Defaults to None.</span>
+<span class="sd">        logger (logging.Logger): Logger object for debug messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Baran1989.__init__">
+<a class="viewcode-back" href="../GC_Baran1989.html#GC_Baran1989.Baran1989.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the Baran1989 class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            net (DistributionNetwork): The distribution network object.</span>
+<span class="sd">            TieLines (list, optional): The initial tie line configuration. Defaults to None.</span>
+<span class="sd">            verbose_logging (int, optional): The logging level for debug messages. Defaults to logging.WARNING.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>  <span class="c1"># Store the distribution network object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;baran1989.py&#39;</span><span class="p">)</span>  <span class="c1"># Create a logger object for debug messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbose_logging</span><span class="p">)</span>  <span class="c1"># Set the logging level for debug messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_config</span> <span class="o">=</span> <span class="n">TieLines</span>  <span class="c1"># Store the initial tie line configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1">#abs(sum([self.grid.loads[i].P for i in range(len(self.grid.loads))]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span> <span class="o">=</span> <span class="n">loss_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span> <span class="o">=</span> <span class="n">fitness_ratio</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">__FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span> <span class="n">config</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1">#fitness = GC_utils.GC_FitnessCalculation(self.grid, self.totalLoad, loss_factor=self.loss_factor, split_factor=self.fitness_ratio)</span>
+            <span class="n">fitness</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">split_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fitness</span>
+            
+<div class="viewcode-block" id="Baran1989.Solve">
+<a class="viewcode-back" href="../GC_Baran1989.html#GC_Baran1989.Baran1989.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solves the Baran 1989 problem by finding the best tie line configuration that minimizes power losses.</span>
+
+<span class="sd">        This function iterates through all loops in the initial network and tries opening/closing tie lines</span>
+<span class="sd">        within each loop. It then checks for radial connectivity and performs power flow analysis to determine</span>
+<span class="sd">        the power losses. The configuration with the minimum losses is returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            order (list, optional): An order for iterating through loops (not used in this implementation). Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The best tie line configuration that minimizes power losses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start solving Baran 1989&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Perform network reconfiguration (consider using a more descriptive method name)</span>
+        <span class="c1">#for line in self.grid.lines:</span>
+        <span class="c1">#    line.active = True</span>
+
+        <span class="c1"># Find initial loops</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">init_loops</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">SearchLoopsLines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span><span class="n">flagUsed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial loops =&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">init_loops</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="si">{</span><span class="n">loop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1">#set initial configuration</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_config</span> <span class="o">=</span> <span class="p">[</span><span class="n">sublist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">init_loops</span> <span class="k">if</span> <span class="n">sublist</span><span class="p">]</span>
+        <span class="c1">#GC_utils.NetworkReconfiguration(self.grid,all=True,value_all=True,selected_configuration=self.initial_config,value_configuration=False)</span>
+        <span class="c1">#self.logger.debug(f&quot;initial config: {self.initial_config}&quot;)</span>
+        <span class="c1">#self.logger.debug(f&quot;radiality: {GC_utils.CheckRadialConnectedNetwork(self.grid)}&quot;)</span>
+        <span class="c1">#_, losses = GC_utils.GC_PowerFlow(grid=self.grid)</span>
+        <span class="c1">#_, losses = self.__powerflow()</span>
+        <span class="c1">#self.logger.debug(f&quot;losses: {losses}&quot;)</span>
+
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_config</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># Check for radial connectivity</span>
+        <span class="n">radial</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="c1">#_,init_losses = GC_utils.GC_PowerFlow(self.grid)</span>
+        <span class="c1">#_, init_losses = self.__powerflow()</span>
+        <span class="n">bestTieLines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_config</span>
+        <span class="k">if</span> <span class="n">radial</span><span class="p">:</span>
+            <span class="c1">#bestlosses = init_losses</span>
+            <span class="n">best_fitness</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#bestlosses = np.inf</span>
+            <span class="n">best_fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="c1">#self.logger.debug(f&quot;initial configuration {bestTieLines}, losses:{bestlosses},radiality:{radial} &quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;initial configuration </span><span class="si">{</span><span class="n">bestTieLines</span><span class="si">}</span><span class="s2">, fitness:</span><span class="si">{</span><span class="n">best_fitness</span><span class="si">}</span><span class="s2">,radiality:</span><span class="si">{</span><span class="n">radial</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">loop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">init_loops</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;new loop </span><span class="si">{</span><span class="n">loop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tie</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; new tie: &#39;</span><span class="si">{</span><span class="n">tie</span><span class="si">}</span><span class="s2">&#39; while loop(idx)=</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">orig_tie</span> <span class="o">=</span> <span class="n">bestTieLines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">newTieLines</span> <span class="o">=</span> <span class="p">[</span><span class="n">tie</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">orig_tie</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bestTieLines</span><span class="p">]</span>
+                <span class="c1"># Perform network reconfiguration with the new tie line configuration</span>
+                <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">newTieLines</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># Check for radial connectivity</span>
+                <span class="n">radial</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+                <span class="c1"># Log debug information</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; temporary newTieLines </span><span class="si">{</span><span class="n">newTieLines</span><span class="si">}</span><span class="s2"> : radial:</span><span class="si">{</span><span class="n">radial</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># If the network is radial, perform power flow analysis and check for improved losses</span>
+                <span class="k">if</span> <span class="n">radial</span><span class="p">:</span>
+                    <span class="c1">#_,losses = GC_utils.GC_PowerFlow(self.grid)</span>
+                    <span class="c1">#_, losses = self.__powerflow()</span>
+                    <span class="n">fitness</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">()</span>
+
+                    <span class="c1">#self.logger.debug(f&quot;  TieLine {newTieLines} : radial = {radial} losses={self.net.losses.real:.4f} outofservice={OutofServiceLines_end}&quot;)</span>
+
+                    <span class="c1"># If the new losses are better than the best found so far, update the best tie lines and losses</span>
+                    <span class="c1">#if (losses &lt; bestlosses):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fitness</span> <span class="o">&lt;</span> <span class="n">best_fitness</span><span class="p">):</span>
+                        <span class="n">bestTieLines</span> <span class="o">=</span> <span class="n">newTieLines</span>
+                    <span class="c1">#    bestlosses = losses</span>
+                        <span class="n">best_fitness</span> <span class="o">=</span> <span class="n">fitness</span>
+                        <span class="c1">#self.logger.debug(f&quot; losses are smaller {bestlosses} than previous tieline, so new one is :{bestTieLines}&quot;)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; fitness is smaller </span><span class="si">{</span><span class="n">best_fitness</span><span class="si">}</span><span class="s2"> than previous tieline, so new one is :</span><span class="si">{</span><span class="n">bestTieLines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1">#self.logger.debug(f&quot; losses are bigger {losses}  than the previous besttielines {bestlosses}&quot;)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; fitness is bigger </span><span class="si">{</span><span class="n">fitness</span><span class="si">}</span><span class="s2">  than the previous besttielines </span><span class="si">{</span><span class="n">best_fitness</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Log the best tie lines and losses</span>
+        <span class="c1">#self.logger.debug(f&quot;Best TieLines ={bestTieLines} with losses={bestlosses}&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best TieLines =</span><span class="si">{</span><span class="n">bestTieLines</span><span class="si">}</span><span class="s2"> with fitness=</span><span class="si">{</span><span class="n">best_fitness</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Return the best tie lines</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">bestTieLines</span><span class="p">)</span></div>
+</div>
+
+    
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">1</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case118.m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;75_77_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_75_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_80_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_97_1&#39;</span><span class="p">,</span> <span class="s1">&#39;94_95_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_94_1&#39;</span><span class="p">,</span> <span class="s1">&#39;105_106_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_103_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_110_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_102_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_99_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_98_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_93_1&#39;</span><span class="p">,</span> <span class="s1">&#39;89_90_1&#39;</span><span class="p">,</span> <span class="s1">&#39;85_88_1&#39;</span><span class="p">,</span> <span class="s1">&#39;82_83_1&#39;</span><span class="p">,</span> <span class="s1">&#39;83_84_1&#39;</span><span class="p">,</span> <span class="s1">&#39;68_81_1&#39;</span><span class="p">,</span> <span class="s1">&#39;62_66_1&#39;</span><span class="p">,</span> <span class="s1">&#39;60_61_1&#39;</span><span class="p">,</span> <span class="s1">&#39;64_65_1&#39;</span><span class="p">,</span> <span class="s1">&#39;59_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;63_64_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_55_1&#39;</span><span class="p">,</span> <span class="s1">&#39;55_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_51_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_50_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_54_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;45_46_1&#39;</span><span class="p">,</span> <span class="s1">&#39;46_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_37_1&#39;</span><span class="p">,</span> <span class="s1">&#39;37_39_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_42_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_41_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_19_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_17_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_32_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_25_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_31_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_113_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_28_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;24_72_1&#39;</span><span class="p">,</span> <span class="s1">&#39;19_20_1&#39;</span><span class="p">,</span> <span class="s1">&#39;4_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;8_30_1&#39;</span><span class="p">,</span> <span class="s1">&#39;3_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_14_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_16_1&#39;</span><span class="p">,</span> <span class="s1">&#39;5_6_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_18_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;47_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_78_1&#39;</span><span class="p">,</span> <span class="s1">&#39;70_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_70_1&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original network: &quot;</span><span class="p">,</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">TieLinesID</span><span class="p">),</span> <span class="n">loss</span><span class="p">,</span> <span class="n">radiality</span> <span class="p">)</span>
+   
+    <span class="n">fitness_ratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">fitness_ratio</span> <span class="ow">in</span> <span class="n">fitness_ratios</span><span class="p">:</span>
+        <span class="c1"># Create a Baran object</span>
+        <span class="n">baran</span> <span class="o">=</span> <span class="n">Baran1989</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="n">fitness_ratio</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">baran</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+
+        <span class="c1"># Print the list of disabled line indices</span>
+        <span class="n">res</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">Vmin</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get_bus_df</span><span class="p">()</span><span class="o">.</span><span class="n">Vm</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, Vmin:</span><span class="si">{</span><span class="n">Vmin</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">baran</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span><span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

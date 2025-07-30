@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_utils &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.Simulations.PowerFlow.power_flow_worker</span><span class="w"> </span><span class="kn">import</span> <span class="n">multi_island_pf_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExternalGridMode</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+<div class="viewcode-block" id="GC_FitnessCalculation">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_FitnessCalculation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_FitnessCalculation</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">totalLoad</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">voltage_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">split_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+	<span class="c1">#Obj_tensió = (MaxAllowedVoltage - minVoltage@iteration) / MaxAllowedVoltage </span>
+	<span class="c1">#   if minVoltage == MaxVoltage --&gt; ObjVoltage = 0 : Perfect</span>
+	<span class="c1">#   if minVoltage == 0 --&gt; ObjVoltage = 1 : wrong</span>
+	<span class="c1">#Obj_Losses = Losses / 0,08*Loads </span>
+	<span class="c1">#   if Losses == 0,08*Loads --&gt; Obj_Losses = 1 : bad</span>
+	<span class="c1">#   if Losses == 0 --&gt; Obj_Losses =0 : good</span>
+    <span class="c1">#Where 0.08 is a parameter to be adjusted</span>
+
+    <span class="c1">#calculate the power flow without reconfiguring the network</span>
+    <span class="c1">#calculate the max and min voltage</span>
+    <span class="c1">#calculate the losses</span>
+    <span class="n">res</span><span class="p">,</span> <span class="n">loss</span>  <span class="o">=</span> <span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="n">AbsVmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Vmax</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">))])</span>
+    <span class="n">Vmin</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get_bus_df</span><span class="p">()</span><span class="o">.</span><span class="n">Vm</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">objVoltage</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">AbsVmax</span><span class="o">-</span><span class="n">Vmin</span><span class="p">))</span><span class="o">*</span><span class="n">voltage_factor</span>
+
+    <span class="n">objLoss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">totalLoad</span> <span class="o">*</span> <span class="n">loss_factor</span>
+
+    <span class="n">fitness</span> <span class="o">=</span> <span class="n">split_factor</span> <span class="o">*</span> <span class="n">objLoss</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">split_factor</span><span class="p">)</span> <span class="o">*</span> <span class="n">objVoltage</span>
+    <span class="k">return</span> <span class="n">fitness</span><span class="o">*</span><span class="mi">100</span></div>
+
+    <span class="c1">#return loss</span>
+
+
+<div class="viewcode-block" id="GC2Graph">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC2Graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC2Graph</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">idtag_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># Create a NetworkX graph</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+    <span class="c1"># Add nodes (buses) to the graph</span>
+    <span class="k">for</span> <span class="n">bus</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">idtag_name</span> <span class="p">:</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">bus</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="n">bus</span><span class="o">.</span><span class="n">Vnom</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">bus</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="n">bus</span><span class="o">.</span><span class="n">Vnom</span><span class="p">)</span>
+
+    <span class="c1"># Add edges (lines) to the graph</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">weights</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">weight</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">weight</span><span class="o">=</span><span class="n">weights</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">idtag_name</span> <span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trafo</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">idtag_name</span> <span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">trafo</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">trafo</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">trafo</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;trafo&quot;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span> <span class="n">trafo</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">trafo</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">trafo</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;trafo&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+<div class="viewcode-block" id="Graph2GC">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.Graph2GC">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Graph2GC</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="c1"># Set all lines to inactive</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+        <span class="n">trafo</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Loop through each edge in the graph (each edge corresponds to a line between two buses).</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="c1"># Enable the line where Bus1 is connected to Bus2 (i.e., the direction from Bus1 to Bus2).</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="p">(((</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)):</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="kc">True</span>
+                <span class="c1">#print(&quot;line with buses&quot;,line.bus_to.name,line.bus_from.name, &quot;compared to u,v:&quot;,u,v)</span>
+                <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="p">(((</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">trafo</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)):</span>
+                <span class="n">trafo</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="kc">True</span>
+                <span class="c1">#print(&quot;line with buses&quot;,line.bus_to.name,line.bus_from.name, &quot;compared to u,v:&quot;,u,v)</span>
+                <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">grid</span></div>
+
+
+<div class="viewcode-block" id="GCNC_GenerateNC">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GCNC_GenerateNC">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GCNC_GenerateNC</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">compile_numerical_circuit_at</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowOptions</span><span class="p">(</span><span class="n">solver_type</span><span class="o">=</span><span class="n">gce</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">NR</span><span class="p">)</span>
+    <span class="n">res_nc</span> <span class="o">=</span> <span class="n">multi_island_pf_nc</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nc</span><span class="p">,</span> <span class="n">res_nc</span></div>
+
+
+<div class="viewcode-block" id="GCNC_CreateBranchDF">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GCNC_CreateBranchDF">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GCNC_CreateBranchDF</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;index&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+        <span class="s1">&#39;bus_from&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">F</span><span class="p">,</span>
+        <span class="s1">&#39;bus_to&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+        <span class="s1">&#39;R&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">R</span><span class="p">,</span>
+        <span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+        <span class="s1">&#39;B&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">B</span><span class="p">,</span>
+        <span class="s1">&#39;active&#39;</span><span class="p">:</span> <span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">active</span><span class="p">,</span>
+    <span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="GCNC_CreateBusDF">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GCNC_CreateBusDF">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GCNC_CreateBusDF</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;index&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+        <span class="s1">&#39;Vnom&#39;</span><span class="p">:</span><span class="n">nc</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">Vnom</span><span class="p">,</span>
+    <span class="p">},</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="GC_PowerFlow">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_PowerFlow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_PowerFlow</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowOptions</span><span class="p">(</span><span class="n">gce</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">NR</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">power_flow</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowDriver</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">power_flow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">power_flow</span><span class="p">,</span> <span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">real</span></div>
+
+
+<div class="viewcode-block" id="LinesOutofService">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.LinesOutofService">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">LinesOutofService</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">idtag</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">idtag</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="EdgeCycles">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.EdgeCycles">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">EdgeCycles</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+
+<span class="c1">#    cycles = nx.cycle_basis(graph)</span>
+<span class="c1">#    cycles_edges = []</span>
+<span class="c1">#</span>
+<span class="c1">#    for cycle in cycles:</span>
+<span class="c1">#        cycle_edges = []</span>
+<span class="c1">#        for i in range(len(cycle)):</span>
+<span class="c1">#            edge = (cycle[i], cycle[(i + 1) % len(cycle)])</span>
+<span class="c1">#            if graph.has_edge(*edge):</span>
+<span class="c1">#                cycle_edges.append(edge)</span>
+<span class="c1">#            else:</span>
+<span class="c1">#                cycle_edges.append((edge[1], edge[0]))  # Add the edge in the correct direction</span>
+<span class="c1">#        cycles_edges.append(cycle_edges)</span>
+<span class="c1">#</span>
+<span class="c1">#    return cycles_edges</span>
+
+    <span class="n">cycles</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">cycle_basis</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">cycles_edges</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycles</span><span class="p">:</span>
+        <span class="n">cycle_edges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cycle</span> <span class="ow">and</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cycle</span><span class="p">:</span>
+                <span class="n">cycle_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="n">cycles_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cycle_edges</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cycles_edges</span></div>
+
+
+
+<div class="viewcode-block" id="GC_Line_Name2idtag_single">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_Line_Name2idtag_single">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_Line_Name2idtag_single</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">LineName</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">LineName</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">idtag</span>
+    <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trafo</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">LineName</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">trafo</span><span class="o">.</span><span class="n">idtag</span></div>
+
+
+<div class="viewcode-block" id="GC_Line_idtag2name_single">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_Line_idtag2name_single">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_Line_idtag2name_single</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">idtag</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">idtag</span> <span class="o">==</span> <span class="n">idtag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trafo</span><span class="o">.</span><span class="n">idtag</span> <span class="o">==</span> <span class="n">idtag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">trafo</span><span class="o">.</span><span class="n">name</span></div>
+
+<div class="viewcode-block" id="GC_Line_Name2idtag_array">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_Line_Name2idtag_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">LineNames</span><span class="p">):</span>
+    <span class="n">LineIdtags</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">LineNames</span><span class="p">:</span>
+        <span class="n">LineIdtags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GC_Line_Name2idtag_single</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">LineIdtags</span></div>
+
+
+<div class="viewcode-block" id="GC_Line_idtag2name_array">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.GC_Line_idtag2name_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">idtags</span><span class="p">):</span>
+    <span class="n">LineNames</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idtag</span> <span class="ow">in</span> <span class="n">idtags</span><span class="p">:</span>
+        <span class="n">LineNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GC_Line_idtag2name_single</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span><span class="n">idtag</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">LineNames</span></div>
+
+
+
+
+<div class="viewcode-block" id="remove_repeated_elements">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.remove_repeated_elements">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_repeated_elements</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sublist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">sublist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sublist</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">list_of_lists</span></div>
+
+
+<div class="viewcode-block" id="SearchLoopsLines">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.SearchLoopsLines">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">SearchLoopsLines</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">GC2Graph</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">loops</span> <span class="o">=</span> <span class="n">EdgeCycles</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">solutionA</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">used</span><span class="o">=</span><span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">shuffle</span><span class="p">):</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">loops</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span><span class="p">:</span>
+        <span class="n">lines_in_loop</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">edge</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">:</span>
+                    <span class="n">lines_in_loop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">idtag</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">edge</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">:</span>
+                    <span class="n">lines_in_loop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">idtag</span><span class="p">)</span>
+                    <span class="c1">#print(&quot;searchloops, trafo found:&quot;,line.idtag)</span>
+        <span class="n">solutionA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines_in_loop</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">flagUsed</span><span class="p">):</span>
+        <span class="n">solutionB</span> <span class="o">=</span> <span class="n">remove_repeated_elements</span><span class="p">(</span><span class="n">solutionA</span><span class="p">)</span>
+        <span class="n">solutionB</span> <span class="o">=</span> <span class="p">[</span><span class="n">sublist</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">solutionB</span> <span class="k">if</span> <span class="n">sublist</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">solutionB</span>
+    <span class="k">return</span> <span class="n">solutionA</span></div>
+
+
+<div class="viewcode-block" id="CheckRadialConnectedNetwork">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.CheckRadialConnectedNetwork">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the network is both radial and connected.</span>
+
+<span class="sd">    This method verifies if the network represented by the graph is a radial network</span>
+<span class="sd">    and whether it is connected. A radial network is defined as a tree structure</span>
+<span class="sd">    (i.e., acyclic and connected).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing three boolean values:</span>
+<span class="sd">            - RadialConnected (bool): True if the network is both radial and connected, False otherwise.</span>
+<span class="sd">            - connected (bool): True if the network is connected, False otherwise.</span>
+<span class="sd">            - radial (bool): True if the network is a tree (radial), False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">GC2Graph</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+        <span class="n">isolated_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">isolates</span><span class="p">(</span><span class="n">graph</span><span class="p">))</span>
+        <span class="n">num_isolated_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">isolated_nodes</span><span class="p">)</span>
+        <span class="n">cycles</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">cycle_basis</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+        <span class="n">num_cycles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cycles</span><span class="p">)</span>
+        <span class="n">RadialConnected</span><span class="o">=</span><span class="n">num_isolated_nodes</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">num_cycles</span><span class="o">==</span><span class="mi">0</span>
+        <span class="k">return</span> <span class="n">RadialConnected</span><span class="p">,</span> <span class="n">num_isolated_nodes</span><span class="p">,</span> <span class="n">num_cycles</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Check if the graph is a tree (radial)</span>
+        <span class="n">radial</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_tree</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+        <span class="c1"># Check if the graph is connected</span>
+        <span class="n">connected</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+        <span class="c1"># Determine if the network is radial and connected</span>
+        <span class="n">RadialConnected</span> <span class="o">=</span> <span class="n">connected</span> <span class="ow">and</span> <span class="n">radial</span>
+        <span class="k">return</span> <span class="n">RadialConnected</span><span class="p">,</span> <span class="n">connected</span><span class="p">,</span> <span class="n">radial</span> </div>
+
+
+<div class="viewcode-block" id="find_value_in_arrays">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.find_value_in_arrays">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_value_in_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arrays</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the index and array containing a specific value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        arrays (list): A list of arrays to search.</span>
+<span class="sd">        value: The value to search for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing the index of the array (if found) and the array itself, or None if not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">array</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">array</span>  <span class="c1"># Return the index and array if found</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># Return None if not found</span></div>
+
+
+<span class="c1"># Function to substitute the value in the array</span>
+<div class="viewcode-block" id="substitute_value">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.substitute_value">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">substitute_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">old_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Substitutes a value in an array with a new value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (list): The array to modify.</span>
+<span class="sd">        old_value: The value to be replaced.</span>
+<span class="sd">        new_value: The new value to replace with.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The modified array with the old value replaced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">==</span> <span class="n">old_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>  <span class="c1"># Replace the old value with the new value</span>
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+<div class="viewcode-block" id="NetworkReconfiguration">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.NetworkReconfiguration">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">NetworkReconfiguration</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Network reconfiguration : sets the line state to on/off depending on the arguments. The changes are applied to the DistributionNetwork structure, to the internal graph and to the original source of information (openDSS, GridCal, PandaPower)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            all=False : if True all the lines will be set to the value in &quot;value_all&quot;, if False the line status will remain as it is.</span>
+<span class="sd">            selected_configuration=None : if different of None, the values in this list will be set to the value in &quot;value_configuration&quot;</span>
+<span class="sd">            value_configuration=False</span>
+<span class="sd">            value_all=False</span>
+<span class="sd">            extraData=True : this atributte indicates if the functions :DistributionNetwork2Graph(), LinesOutService() and NetworkSummary() will be called</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">all</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="n">value_all</span>
+            <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+                <span class="n">trafo</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="n">value_all</span>
+        <span class="k">if</span> <span class="n">selected_configuration</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">selected_configuration</span><span class="p">:</span>
+                    <span class="n">line</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="n">value_configuration</span>
+            <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trafo</span><span class="o">.</span><span class="n">idtag</span> <span class="ow">in</span> <span class="n">selected_configuration</span><span class="p">:</span>
+                    <span class="n">trafo</span><span class="o">.</span><span class="n">active</span><span class="o">=</span><span class="n">value_configuration</span></div>
+
+                               <span class="c1"># Function to check if a list belongs to any of the sublists within a list of lists</span>
+
+<div class="viewcode-block" id="list_belongs_to_list_of_lists">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.list_belongs_to_list_of_lists">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_belongs_to_list_of_lists</span><span class="p">(</span><span class="n">list_to_check</span><span class="p">,</span> <span class="n">list_of_lists</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if the given list is a subset of any list within a list of lists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        list_to_check: The list to check.</span>
+<span class="sd">        list_of_lists: The list of lists to check against.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if the list is a subset of any list in the list of lists, otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_to_check</span><span class="p">)</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># Function to remove duplicates from a list of lists</span>
+<div class="viewcode-block" id="remove_duplicates">
+<a class="viewcode-back" href="../GC_utils.html#GC_utils.remove_duplicates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_duplicates</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes duplicate items from each sublist in a list of lists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        list_of_lists: The list of lists from which to remove duplicates.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The modified list of lists with duplicates removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unique_elements</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List to keep track of unique elements</span>
+    <span class="k">for</span> <span class="n">sub_list</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">:</span>
+        <span class="n">unique_sub_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Initialize a unique sublist</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sub_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_elements</span><span class="p">:</span>
+                <span class="n">unique_sub_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># Add unique item to the sublist</span>
+                <span class="n">unique_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># Track the unique item globally</span>
+        <span class="n">sub_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">unique_sub_list</span>  <span class="c1"># Replace the original sublist with the unique one</span>
+    <span class="k">return</span> <span class="n">list_of_lists</span>  <span class="c1"># Return the modified list of lists</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+    <span class="c1">#Tie=[&#39;e97b6c0ecdd8456d8d5dc2c9cdbe4b01&#39;, &#39;0a64b3f458e2483d9448104540a57da1&#39;, &#39;c685fb815f7f4331b230b2e164bcde2c&#39;, &#39;cf980a54675a4d52ba30436d24fbd529&#39;, &#39;c86eb3e7f72d4735b656c343c3d50061&#39;]</span>
+    <span class="c1">#_, losses = GC_utils.GC_PowerFlow(gridGC, config=[])</span>
+    <span class="c1">#print(&quot;losses=&quot;, losses)</span>
+    <span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">shuffle</span> <span class="o">=</span><span class="kc">False</span>
+    <span class="n">flagUsed</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">SearchLoopsLines</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="n">flagUsed</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">)</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solutions&quot;</span><span class="p">,</span> <span class="n">solution</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">#for loop in solution:</span>
+    <span class="c1">#    print(loop)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

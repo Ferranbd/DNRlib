@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_Khalil_Gorpinich2012 module &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GC_MSTgreedy module" href="GC_MSTgreedy.html" />
+    <link rel="prev" title="GC_Jakus2020 module" href="GC_Jakus2020.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_Khalil_Gorpinich2012 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO"><code class="docutils literal notranslate"><span class="pre">BPSO</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.net"><code class="docutils literal notranslate"><span class="pre">BPSO.net</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.NumCandidates"><code class="docutils literal notranslate"><span class="pre">BPSO.NumCandidates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.NumOffLines"><code class="docutils literal notranslate"><span class="pre">BPSO.NumOffLines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.order"><code class="docutils literal notranslate"><span class="pre">BPSO.order</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.flagUsed"><code class="docutils literal notranslate"><span class="pre">BPSO.flagUsed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.shuffled"><code class="docutils literal notranslate"><span class="pre">BPSO.shuffled</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.verbose_logging"><code class="docutils literal notranslate"><span class="pre">BPSO.verbose_logging</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.CalculateFitness"><code class="docutils literal notranslate"><span class="pre">BPSO.CalculateFitness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.CalculateNewPosition"><code class="docutils literal notranslate"><span class="pre">BPSO.CalculateNewPosition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.CreateCandidateList"><code class="docutils literal notranslate"><span class="pre">BPSO.CreateCandidateList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.DefineActionSpace"><code class="docutils literal notranslate"><span class="pre">BPSO.DefineActionSpace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.RandomCandidateGenerator"><code class="docutils literal notranslate"><span class="pre">BPSO.RandomCandidateGenerator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.Solve"><code class="docutils literal notranslate"><span class="pre">BPSO.Solve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.SortCandidates"><code class="docutils literal notranslate"><span class="pre">BPSO.SortCandidates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateFitness"><code class="docutils literal notranslate"><span class="pre">BPSO.UpdateCandidateFitness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateNewPosition"><code class="docutils literal notranslate"><span class="pre">BPSO.UpdateCandidateNewPosition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.__init__"><code class="docutils literal notranslate"><span class="pre">BPSO.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.config"><code class="docutils literal notranslate"><span class="pre">BPSO.config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Khalil_Gorpinich2012.BPSO.getConvergeceList"><code class="docutils literal notranslate"><span class="pre">BPSO.getConvergeceList()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GC_Khalil_Gorpinich2012 module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/GC_Khalil_Gorpinich2012.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-GC_Khalil_Gorpinich2012">
+<span id="gc-khalil-gorpinich2012-module"></span><h1>GC_Khalil_Gorpinich2012 module<a class="headerlink" href="#module-GC_Khalil_Gorpinich2012" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">GC_Khalil_Gorpinich2012.</span></span><span class="sig-name descname"><span class="pre">BPSO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NumCandidates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TieLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitness_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Binary Particle Swarm Optimization (BPSO) class for optimizing network configurations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.net">
+<span class="sig-name descname"><span class="pre">net</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.net" title="Link to this definition"></a></dt>
+<dd><p>An object representing the network to be optimized.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.NumCandidates">
+<span class="sig-name descname"><span class="pre">NumCandidates</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.NumCandidates" title="Link to this definition"></a></dt>
+<dd><p>Number of candidate solutions to generate.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.NumOffLines">
+<span class="sig-name descname"><span class="pre">NumOffLines</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.NumOffLines" title="Link to this definition"></a></dt>
+<dd><p>Number of lines that can be taken out of service.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.order">
+<span class="sig-name descname"><span class="pre">order</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.order" title="Link to this definition"></a></dt>
+<dd><p>Optional parameter for ordering.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.flagUsed">
+<span class="sig-name descname"><span class="pre">flagUsed</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.flagUsed" title="Link to this definition"></a></dt>
+<dd><p>Flag indicating whether to use certain properties.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.shuffled">
+<span class="sig-name descname"><span class="pre">shuffled</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.shuffled" title="Link to this definition"></a></dt>
+<dd><p>Flag indicating whether to shuffle candidates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.verbose_logging">
+<span class="sig-name descname"><span class="pre">verbose_logging</span></span><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.verbose_logging" title="Link to this definition"></a></dt>
+<dd><p>Logging level for debug messages.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.CalculateFitness">
+<span class="sig-name descname"><span class="pre">CalculateFitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.CalculateFitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.CalculateFitness" title="Link to this definition"></a></dt>
+<dd><p>Calculates the fitness of a candidate configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>candidate</strong> – List of selected configurations to evaluate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the fitness value and a boolean indicating if the configuration is valid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.CalculateNewPosition">
+<span class="sig-name descname"><span class="pre">CalculateNewPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidate_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.CalculateNewPosition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.CalculateNewPosition" title="Link to this definition"></a></dt>
+<dd><p>Calculates the new position of a candidate based on its velocity and best known positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>candidate_idx</strong> – Index of the candidate whose position is being updated.</p></li>
+<li><p><strong>c1</strong> – Cognitive coefficient for personal best influence.</p></li>
+<li><p><strong>c2</strong> – Social coefficient for global best influence.</p></li>
+<li><p><strong>w</strong> – Inertia weight for velocity.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of the new candidate position and the updated velocity.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.CreateCandidateList">
+<span class="sig-name descname"><span class="pre">CreateCandidateList</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.CreateCandidateList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.CreateCandidateList" title="Link to this definition"></a></dt>
+<dd><p>Creates a list of candidates and evaluates their fitness.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.DefineActionSpace">
+<span class="sig-name descname"><span class="pre">DefineActionSpace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.DefineActionSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.DefineActionSpace" title="Link to this definition"></a></dt>
+<dd><p>Defines the action space for the optimization based on network configurations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.RandomCandidateGenerator">
+<span class="sig-name descname"><span class="pre">RandomCandidateGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.RandomCandidateGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.RandomCandidateGenerator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.Solve">
+<span class="sig-name descname"><span class="pre">Solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.Solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.Solve" title="Link to this definition"></a></dt>
+<dd><p>Solves the optimization problem using the BPSO algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wmax</strong> – Maximum inertia weight.</p></li>
+<li><p><strong>wmin</strong> – Minimum inertia weight.</p></li>
+<li><p><strong>beta</strong> – Parameter for the sigmoid function.</p></li>
+<li><p><strong>maxiter</strong> – Maximum number of iterations for the optimization.</p></li>
+<li><p><strong>vmax</strong> – Maximum velocity for the particles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The best global configuration found during optimization.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.SortCandidates">
+<span class="sig-name descname"><span class="pre">SortCandidates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Loops</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.SortCandidates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.SortCandidates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateFitness">
+<span class="sig-name descname"><span class="pre">UpdateCandidateFitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidate_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.UpdateCandidateFitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateFitness" title="Link to this definition"></a></dt>
+<dd><p>Updates the fitness of a specific candidate and updates personal and global bests if needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>candidate_idx</strong> – Index of the candidate to update.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A boolean indicating if the candidate configuration is valid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateNewPosition">
+<span class="sig-name descname"><span class="pre">UpdateCandidateNewPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidate_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.UpdateCandidateNewPosition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateNewPosition" title="Link to this definition"></a></dt>
+<dd><p>Updates the position of a candidate based on the BPSO algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>candidate_idx</strong> – Index of the candidate to update.</p></li>
+<li><p><strong>w</strong> – Inertia weight for velocity calculation.</p></li>
+<li><p><strong>c1</strong> – Cognitive coefficient for personal best influence.</p></li>
+<li><p><strong>c2</strong> – Social coefficient for global best influence.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NumCandidates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TieLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitness_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the BPSO with the given parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> – Network object for optimization.</p></li>
+<li><p><strong>NumCandidates</strong> – Number of candidate solutions.</p></li>
+<li><p><strong>order</strong> – Order for configurations, if any.</p></li>
+<li><p><strong>flagUsed</strong> – Whether to use specific properties.</p></li>
+<li><p><strong>shuffled</strong> – Whether to shuffle candidates.</p></li>
+<li><p><strong>verbose_logging</strong> – Logging level for debug messages.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.config">
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.config" title="Link to this definition"></a></dt>
+<dd><p>Configures the BPSO instance by defining the action space and initializing parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Khalil_Gorpinich2012.BPSO.getConvergeceList">
+<span class="sig-name descname"><span class="pre">getConvergeceList</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Khalil_Gorpinich2012.html#BPSO.getConvergeceList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Khalil_Gorpinich2012.BPSO.getConvergeceList" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GC_Jakus2020.html" class="btn btn-neutral float-left" title="GC_Jakus2020 module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GC_MSTgreedy.html" class="btn btn-neutral float-right" title="GC_MSTgreedy module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

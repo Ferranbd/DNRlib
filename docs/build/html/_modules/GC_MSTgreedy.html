@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_MSTgreedy &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_MSTgreedy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_MSTgreedy</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span> 
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+
+<div class="viewcode-block" id="MSTgreedy">
+<a class="viewcode-back" href="../GC_MSTgreedy.html#GC_MSTgreedy.MSTgreedy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MSTgreedy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to implement the greedy algorithm for finding the Minimum Spanning Tree (MST).</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        net: The network object containing distribution network data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MSTgreedy.__init__">
+<a class="viewcode-back" href="../GC_MSTgreedy.html#GC_MSTgreedy.MSTgreedy.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the MSTgreedy class with required parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            net: The network object for optimization.</span>
+<span class="sd">            verbose_logging: Logging level for debug messages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;mstgreedy.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbose_logging</span><span class="p">)</span>  <span class="c1"># Set logging level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>  <span class="c1"># Store the network object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">__powerflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span>
+    
+<div class="viewcode-block" id="MSTgreedy.Solve">
+<a class="viewcode-back" href="../GC_MSTgreedy.html#GC_MSTgreedy.MSTgreedy.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;kruskal&quot;</span><span class="p">,</span> <span class="n">randomMST</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">one</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_power</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the Minimum Spanning Tree problem using a greedy algorithm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            randomMST: If True, assigns random weights to edges.</span>
+<span class="sd">            algorithm: The algorithm to use for finding the MST (&#39;kruskal&#39;, &#39;prim&#39;, or &#39;boruvka&#39;).</span>
+<span class="sd">            one: If True, assigns a weight of 50 to all edges.</span>
+<span class="sd">            current_power: If True, weights are based on current power values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of disabled line indices in the network after reconfiguration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;mstgreedy.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start solving MSTgreedy&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">trafo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">:</span>
+            <span class="n">trafo</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">gridGraph</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC2Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>  <span class="c1"># Initialize the Minimum Spanning Tree as the network graph</span>
+        
+        <span class="k">if</span> <span class="n">randomMST</span><span class="p">:</span>  <span class="c1"># If randomMST is True, assign random weights to edges</span>
+            <span class="c1">#print(&quot;randomMST&quot;)</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gridGraph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mf">100.0</span>  <span class="c1"># Random weight between 0 and 100</span>
+            <span class="n">MinSpanningTree</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">gridGraph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span>
+                                                       <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">)</span>  <span class="c1"># Calculate MST with random weights</span>
+
+        <span class="k">elif</span> <span class="n">one</span><span class="p">:</span>  <span class="c1"># If one is True, assign a weight of 50 to all edges</span>
+            <span class="c1">#print(&quot;one&quot;)</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gridGraph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="n">MinSpanningTree</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">gridGraph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span>
+                                                       <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">)</span>  <span class="c1"># Calculate MST with weight 50</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If a specific algorithm is provided</span>
+            <span class="c1">#print(&quot;current/power&quot;)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;mstgreedy.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;current_power: </span><span class="si">{</span><span class="n">current_power</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">power_flow</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__powerflow</span><span class="p">()</span>
+
+            <span class="c1">#options = gce.PowerFlowOptions(gce.SolverType.NR, verbose=False)</span>
+            <span class="c1">#power_flow = gce.PowerFlowDriver(self.grid, options)</span>
+            <span class="c1">#power_flow.run()</span>
+            <span class="n">maxCurrent</span> <span class="o">=</span> <span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">If</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>  <span class="c1"># Get the maximum current</span>
+            <span class="n">maxLosses</span> <span class="o">=</span> <span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>  <span class="c1"># Get the maximum losses</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gridGraph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="c1"># Log the current values for debugging</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;mstgreedy.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;line with buses: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">current_power</span><span class="p">:</span>  <span class="c1"># If current_power is True, set weights based on current</span>
+                    <span class="n">current_tmp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> 
+                            <span class="k">if</span> <span class="p">(((</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">))</span> <span class="p">]</span>
+                    <span class="n">current_tmp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">)</span> 
+                            <span class="k">if</span> <span class="p">(((</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">))</span> <span class="p">]</span>
+                    <span class="n">current</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_tmp1</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">current_tmp2</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">current</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">current</span><span class="p">)]</span>
+                    <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">maxCurrent</span> <span class="o">/</span> <span class="n">current</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Otherwise, set weights based on losses</span>
+                    <span class="n">losses_tmp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">If</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="p">(((</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">))</span> <span class="p">]</span>
+                    <span class="n">losses_tmp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">power_flow</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">If</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">transformers2w</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="p">(((</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">u</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="o">==</span><span class="n">v</span><span class="p">))</span> <span class="p">]</span>
+                    <span class="n">losses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">losses_tmp1</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">losses_tmp2</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">losses</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">losses</span><span class="p">)]</span>
+                    <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">maxLosses</span> <span class="o">/</span> <span class="n">losses</span>
+                <span class="k">if</span> <span class="n">inverted</span><span class="p">:</span>
+                    <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+            <span class="c1"># Calculate the Minimum Spanning Tree using the defined weights</span>
+            <span class="n">MinSpanningTree</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">gridGraph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">)</span>
+
+        <span class="c1"># Return the list of disabled line indices after reconfiguration</span>
+        <span class="c1">#print(&quot;MinSpanningTree: &quot;, MinSpanningTree)</span>
+
+
+        <span class="c1"># Set all lines to inactive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">Graph2GC</span><span class="p">(</span><span class="n">MinSpanningTree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="c1">#for line in self.grid.lines:</span>
+        <span class="c1">#    line.active = False</span>
+        <span class="c1"># Loop through each edge in the graph (each edge corresponds to a line between two buses).</span>
+        <span class="c1">#for _, (u, v, attributes) in enumerate(MinSpanningTree.edges(data=True)):</span>
+            <span class="c1"># Enable the line where Bus1 is connected to Bus2 (i.e., the direction from Bus1 to Bus2).</span>
+        <span class="c1">#    for idx, line in enumerate(self.grid.lines) :</span>
+        <span class="c1">#        if (((line.bus_to.name==v) &amp; (line.bus_from.name==u)) | (line.bus_to.name==u) &amp; (line.bus_from.name==v)):</span>
+        <span class="c1">#            line.active=True</span>
+        <span class="c1">#            #print(&quot;line with buses&quot;,line.bus_to.name,line.bus_from.name, &quot;compared to u,v:&quot;,u,v)</span>
+        <span class="c1">#            continue</span>
+            
+
+        <span class="k">return</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">LinesOutofService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">1</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case118.m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;75_77_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_75_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_80_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_97_1&#39;</span><span class="p">,</span> <span class="s1">&#39;94_95_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_94_1&#39;</span><span class="p">,</span> <span class="s1">&#39;105_106_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_103_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_110_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_102_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_99_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_98_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_93_1&#39;</span><span class="p">,</span> <span class="s1">&#39;89_90_1&#39;</span><span class="p">,</span> <span class="s1">&#39;85_88_1&#39;</span><span class="p">,</span> <span class="s1">&#39;82_83_1&#39;</span><span class="p">,</span> <span class="s1">&#39;83_84_1&#39;</span><span class="p">,</span> <span class="s1">&#39;68_81_1&#39;</span><span class="p">,</span> <span class="s1">&#39;62_66_1&#39;</span><span class="p">,</span> <span class="s1">&#39;60_61_1&#39;</span><span class="p">,</span> <span class="s1">&#39;64_65_1&#39;</span><span class="p">,</span> <span class="s1">&#39;59_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;63_64_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_55_1&#39;</span><span class="p">,</span> <span class="s1">&#39;55_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_51_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_50_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_54_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;45_46_1&#39;</span><span class="p">,</span> <span class="s1">&#39;46_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_37_1&#39;</span><span class="p">,</span> <span class="s1">&#39;37_39_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_42_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_41_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_19_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_17_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_32_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_25_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_31_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_113_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_28_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;24_72_1&#39;</span><span class="p">,</span> <span class="s1">&#39;19_20_1&#39;</span><span class="p">,</span> <span class="s1">&#39;4_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;8_30_1&#39;</span><span class="p">,</span> <span class="s1">&#39;3_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_14_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_16_1&#39;</span><span class="p">,</span> <span class="s1">&#39;5_6_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_18_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;47_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_78_1&#39;</span><span class="p">,</span> <span class="s1">&#39;70_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_70_1&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original network:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC,TieLinesID)}&quot; )</span>
+
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">randomMST</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;randomMST The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">randomMST</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;prim&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;randomMST/Prim The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">one</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;One The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">one</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;prim&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;One/Prim The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">current_power</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;kruskal&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current/Kruskal The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+    
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">current_power</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;prim&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current/Prim The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+    
+    <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">current_power</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;prim&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Power/Prim The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

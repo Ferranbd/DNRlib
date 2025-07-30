@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_DistributionNetworkReconfiguration &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_DistributionNetworkReconfiguration</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_DistributionNetworkReconfiguration</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Baran1989</span><span class="w"> </span><span class="kn">import</span> <span class="n">Baran1989</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Jakus2020</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jakus2020</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Khalil_Gorpinich2012</span><span class="w"> </span><span class="kn">import</span> <span class="n">BPSO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Merlin1975</span><span class="w"> </span><span class="kn">import</span> <span class="n">Merlin1975</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Salkuti2021</span><span class="w"> </span><span class="kn">import</span> <span class="n">Saltuki2021</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_MSTgreedy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MSTgreedy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Morton2000</span><span class="w"> </span><span class="kn">import</span> <span class="n">Morton2000</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GC_Taylor2012_pyomo</span><span class="w"> </span><span class="kn">import</span> <span class="n">MICP_Pyomo</span> <span class="k">as</span> <span class="n">MICP_Pyomo</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+
+
+
+<div class="viewcode-block" id="DistributionNetworkReconfiguration">
+<a class="viewcode-back" href="../GC_DistributionNetworkReconfiguration.html#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DistributionNetworkReconfiguration</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Library of Distribution Network Reconfiguration algorithms</span>
+<span class="sd">    Constraints : radial topology without unconnected nodes</span>
+<span class="sd">    Available algorithms :</span>
+<span class="sd">    - Heuristic : Baran (1989), Merlin (1975), Morton (2000), MSTgreedy, Salkuti (2021)</span>
+<span class="sd">    - Metaheuristic : Jakus (2020), Khalil-Gorpinich (2012)</span>
+<span class="sd">    - Mathematical : Jabr-Taylor (2012), Taylor-gurobi (2012), Taylor-pyomo 2012)</span>
+
+<span class="sd">    The input is the grid</span>
+<span class="sd">    The output is the list of disabled lines</span>
+
+<span class="sd">    example:</span>
+<span class="sd">    mst = sp.src(G)</span>
+<span class="sd">    mst_Prim_edges = mst.Solve(&#39;Prim&#39;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="DistributionNetworkReconfiguration.__init__">
+<a class="viewcode-back" href="../GC_DistributionNetworkReconfiguration.html#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        to initialize the class requires the grid format (openDSS, GridCal or PandaPower) and the grid file name</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span> <span class="o">=</span> <span class="n">verbose_logging</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>  <span class="c1">#dn class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;DistributionNetworkReconfiguration.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;init DNR&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Merlin1975</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">merlin</span> <span class="o">=</span> <span class="n">Merlin1975</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="n">merlin</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="n">merlin</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Baran1989</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">baran</span> <span class="o">=</span> <span class="n">Baran1989</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLines</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="n">baran</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="n">baran</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Jakus2020</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TieLines</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">PopulationSize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">PopulationSize_SBEA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ElitePopulation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">Niter</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jakus</span> <span class="o">=</span> <span class="n">Jakus2020</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLines</span><span class="p">,</span> <span class="n">PopulationSize</span><span class="o">=</span><span class="n">PopulationSize</span><span class="p">,</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="n">MutationProbability</span><span class="p">,</span>
+                          <span class="n">ElitePopulation</span><span class="o">=</span><span class="n">ElitePopulation</span><span class="p">,</span> <span class="n">Niter</span><span class="o">=</span><span class="n">Niter</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="n">fitness_ratio</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="n">loss_factor</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="c1">#_jakus = Jakus2020(grid=self.grid,Niter=8, TieLines=TieLines, verbose_logging=self.verbose_logging)</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jakus</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jakus</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Khalil2012</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NumCandidates</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="n">_bpso</span> <span class="o">=</span> <span class="n">BPSO</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">NumCandidates</span><span class="o">=</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLines</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">_bpso</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="n">_bpso</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">wmax</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">wmin</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="n">maxiter</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="n">_bpso</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Salkuti2021</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">salkuti</span> <span class="o">=</span> <span class="n">Saltuki2021</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLines</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="n">salkuti</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="n">salkuti</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_MSTgreedy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">randomMST</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">one</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_power</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">mstgreedy</span> <span class="o">=</span> <span class="n">MSTgreedy</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">DisabledLines</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">randomMST</span><span class="o">=</span><span class="n">randomMST</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">one</span><span class="o">=</span><span class="n">one</span><span class="p">,</span> <span class="n">current_power</span><span class="o">=</span><span class="n">current_power</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="n">mstgreedy</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">DisabledLines</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Taylor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;SOC&quot;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s2">&quot;IPOPT&quot;</span><span class="p">,</span> <span class="n">bigM</span><span class="o">=</span><span class="mf">1e8</span><span class="p">,</span> <span class="n">Imax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Vbase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Vnom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zbase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vbase</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">load</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">Q</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">R</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zbase</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">X</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zbase</span>
+
+        <span class="n">micp</span> <span class="o">=</span> <span class="n">MICP_Pyomo</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">NumTieLines</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">TieLines</span><span class="p">),</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">bigM</span><span class="o">=</span><span class="n">bigM</span><span class="p">,</span> <span class="n">Imax</span> <span class="o">=</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">convergence</span><span class="p">,</span> <span class="n">MICPBestConfiguration</span> <span class="o">=</span> <span class="n">micp</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">load</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">Q</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zbase</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">X</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zbase</span>
+        <span class="k">return</span> <span class="n">MICPBestConfiguration</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_Morton2000</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TieLines</span><span class="p">):</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span><span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">initial_loops</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">SearchLoopsLines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">initial_loops</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">morton</span> <span class="o">=</span> <span class="n">Morton2000</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">init_config</span><span class="o">=</span><span class="n">TieLines</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose_logging</span><span class="p">)</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">morton</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">morton</span><span class="o">.</span><span class="n">NumPF</span>
+        <span class="k">return</span> <span class="n">disabled_lines</span>
+
+<div class="viewcode-block" id="DistributionNetworkReconfiguration.Solve">
+<a class="viewcode-back" href="../GC_DistributionNetworkReconfiguration.html#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Baran&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        once the class is initialize, the only available function is the Solve function, which obtains the MST based</span>
+<span class="sd">        on the algorithm given by the argument &#39;method&#39;, which is &#39;Kruskal&#39; by default</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;merlin&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Merlin1975</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;baran&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Baran1989</span><span class="p">(</span><span class="n">TieLines</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;TieLines&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;jakus&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;ElitePopulation&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">ElitePopulation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ElitePopulation&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ElitePopulation</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;PopulationSize&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Jakus2020</span><span class="p">(</span><span class="n">PopulationSize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;PopulationSize&#39;</span><span class="p">],</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;MutationProbability&#39;</span><span class="p">],</span>
+                    <span class="n">TieLines</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;TieLines&#39;</span><span class="p">],</span> <span class="n">ElitePopulation</span><span class="o">=</span><span class="n">ElitePopulation</span><span class="p">,</span> <span class="n">Niter</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Niter&#39;</span><span class="p">],</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fitness_ratio&#39;</span><span class="p">],</span> <span class="n">loss_factor</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;loss_factor&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;khalil&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Khalil2012</span><span class="p">(</span><span class="n">NumCandidates</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;NumCandidates&#39;</span><span class="p">],</span> <span class="n">TieLines</span><span class="o">=</span><span class="p">[])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;salkuti&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Salkuti2021</span><span class="p">(</span><span class="n">TieLines</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;TieLines&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mstgreedy&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MSTgreedy</span><span class="p">(</span><span class="n">randomMST</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;randomMST&#39;</span><span class="p">],</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">],</span> <span class="n">one</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">],</span> <span class="n">current_power</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;current_power&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;taylor&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Taylor</span><span class="p">(</span><span class="n">algorithm</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">],</span> <span class="n">solver</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;solver&#39;</span><span class="p">],</span> <span class="n">bigM</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bigM&#39;</span><span class="p">],</span> <span class="n">Imax</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Imax&#39;</span><span class="p">],</span> <span class="n">vmin</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;vmin&#39;</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;vmax&#39;</span><span class="p">],</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;TieLines&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;morton&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Morton2000</span><span class="p">(</span><span class="n">TieLines</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;TieLines&#39;</span><span class="p">])</span></div>
+</div>
+
+
+
+
+ 
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">1</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original network: &quot;</span><span class="p">,</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">TieLinesID</span><span class="p">),</span> <span class="n">loss</span><span class="p">,</span> <span class="n">radiality</span> <span class="p">)</span>
+
+    <span class="n">dnr</span> <span class="o">=</span> <span class="n">DistributionNetworkReconfiguration</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Merlin&quot;</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Merlin: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Merlin&quot;</span><span class="p">)</span>        
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Baran&quot;</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Baran: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Baran&quot;</span><span class="p">)</span>        
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Salkuti&quot;</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Salkuti: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Salkuti&quot;</span><span class="p">)</span>        
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;MSTgreedy&quot;</span><span class="p">,</span> <span class="n">randomMST</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">one</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_power</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;prim&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MSTgreedy: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla MSTGreedy&quot;</span><span class="p">)</span>        
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Khalil&quot;</span><span class="p">,</span> <span class="n">NumCandidates</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Khalil: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Khalil&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">dnr</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Jakus&quot;</span><span class="p">,</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">PopulationSize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">Niter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">ElitePopulation</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jakus: The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">dnr</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="w"> </span><span class="n">disabled_lines</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Jakus&quot;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">disabled_lines_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 6&#39;</span><span class="p">,</span> <span class="s1">&#39;line 8&#39;</span><span class="p">,</span> <span class="s1">&#39;line 13&#39;</span><span class="p">,</span> <span class="s1">&#39;line 31&#39;</span><span class="p">,</span> <span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+            <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">disabled_lines_name</span><span class="p">)</span>
+        <span class="c1">#disabled_lines = dnr.Solve(method=&quot;Morton&quot;, TieLines=TieLines)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Morton: &quot;</span><span class="p">,</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">disabled_lines</span><span class="p">),</span> <span class="n">loss</span><span class="p">,</span> <span class="n">radiality</span> <span class="p">)</span>   
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;falla Morton&quot;</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

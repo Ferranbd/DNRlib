@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_PandaPowerImporter &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_PandaPowerImporter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_PandaPowerImporter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="c1"># The initial proces had the following steps :</span>
+<span class="c1"># pp.converter.to_mpc(gridPP,&quot;network.mat&quot;)</span>
+<span class="c1"># the network.mat file is opened with matlab/matpower</span>
+<span class="c1"># am=load(&#39;network.mat&#39;)</span>
+<span class="c1"># and saved as .m</span>
+<span class="c1"># savecase(&#39;network.m&#39;,am.mpc)</span>
+<span class="c1"># gridGCmp = gce.open_file(&quot;network.m&quot;)</span>
+<span class="c1"># but this is optimized by converting the .mat file to .m directly in python</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">__DeleteTmpFiles</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1">#print(f&quot;File &#39;{filename}&#39; has been deleted.&quot;)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Permission denied: unable to delete &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while deleting &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PP2GC">
+<a class="viewcode-back" href="../GC_PandaPowerImporter.html#GC_PandaPowerImporter.PP2GC">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">):</span>
+    <span class="c1">#by the moment, I still use two temporary files, which I need to delete at the end of the process</span>
+    <span class="n">tmp_file_in</span> <span class="o">=</span> <span class="s2">&quot;tmp.mat&quot;</span>
+    <span class="n">tmp_file_out</span> <span class="o">=</span> <span class="s2">&quot;tmp.m&quot;</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">converter</span><span class="o">.</span><span class="n">to_mpc</span><span class="p">(</span><span class="n">gridPP</span><span class="p">,</span><span class="n">tmp_file_in</span><span class="p">)</span>
+    <span class="c1"># Load the .mat file</span>
+    <span class="n">mat_data</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">tmp_file_in</span><span class="p">)</span>   
+    <span class="n">convert_mat_to_m</span><span class="p">(</span><span class="n">mat_data</span><span class="p">,</span> <span class="n">tmp_file_out</span><span class="p">)</span>
+    <span class="n">gridGC</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">tmp_file_out</span><span class="p">)</span>
+    <span class="n">gridGC</span><span class="o">.</span><span class="n">Sbase</span><span class="o">=</span><span class="n">gridPP</span><span class="o">.</span><span class="n">sn_mva</span>
+    <span class="n">__DeleteTmpFiles</span><span class="p">(</span><span class="n">tmp_file_in</span><span class="p">)</span>
+    <span class="n">__DeleteTmpFiles</span><span class="p">(</span><span class="n">tmp_file_out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gridGC</span></div>
+
+
+
+<div class="viewcode-block" id="convert_mat_to_m">
+<a class="viewcode-back" href="../GC_PandaPowerImporter.html#GC_PandaPowerImporter.convert_mat_to_m">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_mat_to_m</span><span class="p">(</span><span class="n">mat_data</span><span class="p">,</span> <span class="n">output_m_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a MATPOWER .mat file to a .m file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        input_mat_file (str): Path to the input .mat file containing the MATPOWER case.</span>
+<span class="sd">        output_m_file (str): Path to the output .m file to be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Extract the MATPOWER case structure (assuming it is stored under &#39;mpc&#39;)</span>
+    <span class="n">mpc</span> <span class="o">=</span> <span class="n">mat_data</span><span class="p">[</span><span class="s1">&#39;mpc&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Open the output .m file for writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_m_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># Write the function definition and version</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;function mpc = </span><span class="si">{</span><span class="n">output_m_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> MATPOWER Case Format : Version 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.version = &#39;2&#39;;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the system MVA base</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> system MVA base</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mpc.baseMVA = </span><span class="si">{</span><span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;baseMVA&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the bus data</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> bus data</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> bus_i type Pd Qd Gs Bs area Vm Va baseKV zone Vmax Vmin</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.bus = [</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;bus&#39;</span><span class="p">]:</span>
+            <span class="n">txtline</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx</span><span class="o">&lt;</span><span class="mi">13</span><span class="p">:</span>
+                    <span class="n">txtline</span> <span class="o">=</span>  <span class="n">txtline</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+            <span class="c1">#f.write(&quot;    &quot; + &quot; &quot;.join(txtline) + &quot;;\n&quot;)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="n">txtline</span> <span class="o">+</span> <span class="s2">&quot;;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;];</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the generator data</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> generator data</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> bus Pg Qg Qmax Qmin Vg mBase status Pmax Pmin ...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.gen = [</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;gen&#39;</span><span class="p">]:</span>
+            <span class="n">txtline</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx</span><span class="o">&lt;</span><span class="mi">25</span><span class="p">:</span>
+                    <span class="n">txtline</span> <span class="o">=</span>  <span class="n">txtline</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+            <span class="c1">#f.write(&quot;    &quot; + &quot; &quot;.join(txtline) + &quot;;\n&quot;)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="n">txtline</span> <span class="o">+</span> <span class="s2">&quot;;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;];</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the branch data</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> branch data</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> fbus tbus r x b rateA rateB rateC ratio angle status angmin angmax</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.branch = [</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;branch&#39;</span><span class="p">]:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;];</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the generator cost data (if it exists)</span>
+        <span class="k">if</span> <span class="s1">&#39;gencost&#39;</span> <span class="ow">in</span> <span class="n">mpc</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> generator cost data</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> 1 startup shutdown n x1 y1 ... xn yn</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> 2 startup shutdown n c(n-1) ... c0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.gencost = [</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;gencost&#39;</span><span class="p">]:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;];</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the bus names (if they exist)</span>
+        <span class="k">if</span> <span class="s1">&#39;bus_name&#39;</span> <span class="ow">in</span> <span class="n">mpc</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2"> bus names</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mpc.bus_name = {</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">mpc</span><span class="p">[</span><span class="s1">&#39;bus_name&#39;</span><span class="p">]:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    &#39;</span><span class="si">{</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;};</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1">#print(f&quot;MATPOWER case saved to {output_m_file}&quot;)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">gridPP</span><span class="o">=</span><span class="n">pp</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">case33bw</span><span class="p">()</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;powerflow of the original pandapower 33 buses network&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in pandapower&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   bus -5: &quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_bus</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">pl_mw</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">ql_mvar</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+    <span class="n">gridGC</span> <span class="o">=</span> <span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">gridGC</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowOptions</span><span class="p">(</span><span class="n">gce</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">NR</span><span class="p">,</span> <span class="n">initialize_with_existing_solution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">control_q</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowDriver</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in gridcal&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get_bus_df</span><span class="p">()</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+
+    <span class="n">gridPP</span><span class="o">=</span><span class="n">pp</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">case118</span><span class="p">()</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;powerflow of the original pandapower 118 buses network&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in pandapower&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   bus -5: &quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_bus</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">pl_mw</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">ql_mvar</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+    <span class="n">gridGC</span> <span class="o">=</span> <span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">gridGC</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowOptions</span><span class="p">(</span><span class="n">gce</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">NR</span><span class="p">,</span> <span class="n">initialize_with_existing_solution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">control_q</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowDriver</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in gridcal&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get_bus_df</span><span class="p">()</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+    <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+    <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+    <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+    <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;powerflow of the original simbench&quot;</span><span class="p">,</span><span class="n">sb_code1</span><span class="p">,</span><span class="s2">&quot;network&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in pandapower&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   bus -5: &quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_bus</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">pl_mw</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">gridPP</span><span class="o">.</span><span class="n">res_line</span><span class="o">.</span><span class="n">ql_mvar</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+    <span class="n">gridGC</span> <span class="o">=</span> <span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">gridGC</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowOptions</span><span class="p">(</span><span class="n">gce</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">NR</span><span class="p">,</span> <span class="n">initialize_with_existing_solution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">control_q</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">PowerFlowDriver</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solved in gridcal&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get_bus_df</span><span class="p">()</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   power losses:&quot;</span><span class="p">,</span> <span class="n">power_flowPP2GC</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

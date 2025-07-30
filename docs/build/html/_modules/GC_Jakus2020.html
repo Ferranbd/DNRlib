@@ -1,0 +1,607 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_Jakus2020 &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_Jakus2020</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_Jakus2020</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_Baran1989</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+<span class="c1">## based on Jakus 2020</span>
+
+<span class="c1">#network define (case33, case16,....)</span>
+<span class="c1">#define algorithm settings(Niter, Npop, ...)</span>
+    <span class="c1">#population size: = 14</span>
+    <span class="c1">#mutation probability: = 2%</span>
+    <span class="c1">#number of individuals in the initial population generated using SBEA: = 4</span>
+    <span class="c1">#number of elite individuals: = 1.</span>
+
+<span class="c1">#generate the initial population</span>
+    <span class="c1">#SBEA</span>
+        <span class="c1">#run the Baran algorithm, based on fitness (powerflow/losses/voltage drop) on each branch and obtain a radial configuration</span>
+        <span class="c1">#randomly suffle the the obtained configuration </span>
+        <span class="c1">#modify the configuration by the objective function defined (power losses, voltage drop)</span>
+        
+    <span class="c1">#Random Kruskal</span>
+        <span class="c1">#generate random weights for the branches/lines</span>
+        <span class="c1">#find the Kruskal&#39;s MST for this configuration</span>
+        <span class="c1">#generate Npop-Nsbea configurations</span>
+
+<span class="c1">#Merge the populations generated by SBEA and Random Kruskal</span>
+
+<span class="c1">#Loop for Niter</span>
+    <span class="c1">#Calculate the fitness function for each individual in the generated population</span>
+    <span class="c1">#Detection of Nel elite individuals</span>
+    <span class="c1">#Selection of the individuals for the crossover process</span>
+    <span class="c1">#offspring generation through crossover of selected pairs of individuals</span>
+    <span class="c1">#offspring mutation</span>
+    <span class="c1">#replacement of worst individuals obtained after crossover and mutation with the elite individuals</span>
+
+<span class="c1">#final power flow for the obtained topology</span>
+
+<div class="viewcode-block" id="Jakus2020">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Jakus2020</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements the Jakus 2020 algorithm for distribution network reconfiguration (DNR).</span>
+
+<span class="sd">    This class utilizes a genetic algorithms to optimize the distribution network</span>
+<span class="sd">    reconfiguration by minimizing fitness (power losses/voltage drop) and ensuring radial connectivity.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        net (DistributionNetwork): The distribution network instance.</span>
+<span class="sd">        PopulationSize (int): Size of the population for the genetic algorithm.</span>
+<span class="sd">        TieLines (list): List of Tie lines Lists. [previously was a single Tie Lines list for supplying Baran algorithm]</span>
+<span class="sd">        MutationProbability (float): Probability of mutation during the genetic process.</span>
+<span class="sd">        #discarted : PopulationSize_SBEA (int): Population size for the SBEA. #this parameter is not in use, ç</span>
+<span class="sd">            the SBEA candidates will be generated externally and added in the TieLines parameter</span>
+<span class="sd">        ElitePopulation (int): Number of elite individuals to retain.</span>
+<span class="sd">        Niter (int): Number of iterations for the genetic algorithm.</span>
+<span class="sd">        NumParentPairs (int): Number of parent pairs for crossover.</span>
+<span class="sd">        OffspringSize (int): Size of the offspring population.</span>
+<span class="sd">        Candidates (list): List of candidate solutions.</span>
+<span class="sd">        verbose (int): Logging level for verbose output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Jakus2020.__init__">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">PopulationSize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                 <span class="n">ElitePopulation</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">Niter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the Jakus2020 class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            net (DistributionNetwork): The distribution network instance.</span>
+<span class="sd">            TieLines (list): List of tie lines in the network.</span>
+<span class="sd">            PopulationSize (int): Size of the population for the genetic algorithm.</span>
+<span class="sd">            MutationProbability (float): Probability of mutation during the genetic process.</span>
+<span class="sd">            PopulationSize_SBEA (int): Population size for the SBEA.</span>
+<span class="sd">            ElitePopulation (int): Number of elite individuals to retain.</span>
+<span class="sd">            Niter (int): Number of iterations for the genetic algorithm.</span>
+<span class="sd">            verbose_logging (int): Logging level for verbose output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PopulationSize</span> <span class="o">=</span> <span class="n">PopulationSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span> <span class="o">=</span> <span class="n">TieLines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MutationProbability</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MutationProbability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PopulationSize_SBEA</span> <span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">TieLines</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElitePopulation</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">ElitePopulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Niter</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Niter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OffspringSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PopulationSize</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElitePopulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumParentPairs</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OffspringSize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose_logging</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>  <span class="c1"># Set logging level</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Created instance of GA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">))]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span> <span class="o">=</span> <span class="n">loss_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span> <span class="o">=</span> <span class="n">fitness_ratio</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+    
+            <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span> <span class="n">config</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">fitness</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span><span class="p">,</span> <span class="n">split_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fitness</span>        
+
+
+<div class="viewcode-block" id="Jakus2020.SortCandidates">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.SortCandidates">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SortCandidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Candidates</span><span class="p">,</span> <span class="n">Loops</span><span class="p">):</span>
+        <span class="n">SortedCandidates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">Candidates</span><span class="p">:</span>
+            <span class="c1">#print(&quot;######## Candidate &quot;, candidate)</span>
+            <span class="n">sorted_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidate</span><span class="p">))</span>
+            <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">occurrences</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">sublist</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">Loops</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">]</span>
+            <span class="n">occurrences_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">occurrences</span><span class="p">)</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">persistence</span><span class="p">:</span>
+                <span class="n">persistence</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">column_summary</span> <span class="o">=</span> <span class="n">occurrences_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1">#print(occurrences_array)</span>
+                <span class="c1">#print(&quot;column_summary&quot;, column_summary)</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_summary</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1">#print(f&quot;Candidate:{int(candidate[idx_candidate[0]])} column:{idx} - {occurrences_array[:, idx]} found:{idx_candidate}&quot;)</span>
+                        <span class="n">sorted_candidate</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                        <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">row_summary</span> <span class="o">=</span> <span class="n">occurrences_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1">#print(occurrences_array)</span>
+                <span class="c1">#print(&quot;sorted candidate:&quot;, sorted_candidate)</span>
+                <span class="c1">#print(&quot;row_summary&quot;, row_summary)</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_summary</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1">#print(f&quot;Candidate:{int(candidate[idx])} row:{idx} - {occurrences_array[idx, :]} found:{idx_candidate}&quot;)</span>
+                        <span class="n">sorted_candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidate</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                        <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1">#print(&quot;sorted candidate:&quot;, sorted_candidate)</span>
+                <span class="k">if</span> <span class="n">persistence</span><span class="p">:</span>
+                    <span class="c1">#print(&quot;persistence&quot;)</span>
+                    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_summary</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">element</span><span class="p">:</span>
+                            <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="c1">#print(f&quot;Candidate:{int(candidate[idx_candidate[0]])} column:{idx} - {occurrences_array[:, idx]} found:{idx_candidate}&quot;)</span>
+                            <span class="n">sorted_candidate</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                            <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">break</span>
+                <span class="c1">#print(&quot;sorted candidate:&quot;, sorted_candidate)</span>
+            <span class="n">SortedCandidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">sorted_candidate</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">SortedCandidates</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.RandomCandidateGenerator">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.RandomCandidateGenerator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RandomCandidateGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1">#the Jakus paper proposed to create the candidates by generating MST with random weights</span>
+        <span class="n">Candidates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">NetworkLoops</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">SearchLoopsLines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RandomKruskalCandidate</span><span class="p">()</span>
+            <span class="n">Candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Candidates</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_RandomKruskalCandidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a new candidate solution using Kruskal&#39;s algorithm. (from Jakus GA algorithm)</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            type =  &#39;CurrentKruskal&#39; (default): generates a MST based on the network current with all tielines closed</span>
+<span class="sd">                    &#39;RandomKruskal&#39; : generates a MST based on random weights in all the edges</span>
+<span class="sd">                    &#39;PSO&#39; : generates a random ST, using a set of Loops without repeated edges</span>
+<span class="sd">            Loops = the network loops to be considered for PSO case</span>
+<span class="sd">            variation = (real) the weight to apply on the randomization of the edge currents, which allow to generate different valid candidate solutions</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A candidate configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;DistributionNetwork.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;_RandomCandidate: generate a new candidate with Kruskal&quot;</span><span class="p">)</span>
+
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC2Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+        <span class="n">MinSpanningTree</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;kruskal&quot;</span><span class="p">)</span>
+
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">Graph2GC</span><span class="p">(</span><span class="n">MinSpanningTree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">outofservice</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">LinesOutofService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">fitness</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="n">outofservice</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">outofservice</span><span class="p">,</span><span class="n">fitness</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Jakus2020.BaranCandidateGenerator">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.BaranCandidateGenerator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">BaranCandidateGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Create an MSTgreedy object</span>
+        <span class="n">baran</span> <span class="o">=</span> <span class="n">GC_Baran1989</span><span class="o">.</span><span class="n">Baran1989</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">,</span><span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="c1"># Solve the Minimum Spanning Tree problem</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">baran</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+        <span class="n">fitness</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">disabled_lines</span><span class="p">,</span><span class="n">fitness</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.InitialPopulationGeneration">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.InitialPopulationGeneration">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">InitialPopulationGeneration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates the initial population combining SBEA and Kruskal&#39;s algorithm.</span>
+
+<span class="sd">        This method combines candidates generated from SBEA and Kruskal&#39;s algorithms</span>
+<span class="sd">        and sorts them based on their fitness values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;InitialPopulationGeneration: generate the initial population&quot;</span><span class="p">)</span>
+        <span class="n">fitness</span><span class="p">,</span> <span class="n">radial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial TieLines Candidate (fitness:</span><span class="si">{</span><span class="n">fitness</span><span class="si">}</span><span class="s2">) : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">,</span><span class="n">fitness</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BaranCandidateGenerator</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RandomCandidateGenerator</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PopulationSize</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;InitialPopulationGeneration len: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        </div>
+
+
+<div class="viewcode-block" id="Jakus2020.CalculateFitness">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.CalculateFitness">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CalculateFitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the fitness of a candidate configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate: List of selected configurations to evaluate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple containing the fitness value and a boolean indicating if the configuration is valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                        <span class="n">selected_configuration</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">configuration</span><span class="p">),</span>
+                                        <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">radialconnected</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">radialconnected</span><span class="p">:</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">()</span>
+            <span class="n">fitness_value</span> <span class="o">=</span> <span class="n">losses</span>    <span class="c1">####change fitness</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;network.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The configuration is complaint with the radiality constraint and has a fitness=</span><span class="si">{</span><span class="n">fitness_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">fitness_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;network.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The configuration does not comply with the radiality constraint&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>  <span class="c1"># Return infinite fitness for invalid configurations</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.ParentsSelection">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.ParentsSelection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ParentsSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates offspring candidates from the current population.</span>
+
+<span class="sd">        The method calculates the fitness for each candidate in the current population</span>
+<span class="sd">        and selects parent pairs based on their fitness values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of parent pairs for generating offspring.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;OffspringGeneration&quot;</span><span class="p">)</span>
+        <span class="n">Fitnesses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">]</span>
+        <span class="n">TotalFitnesses</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">Fitnesses</span><span class="p">)</span>
+        <span class="n">IndividualProbability</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">/</span> <span class="n">TotalFitnesses</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Fitnesses</span><span class="p">]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;*************** OffspringGeneration - fitness: </span><span class="si">{</span><span class="n">Fitnesses</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="n">CumulativeProbability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">IndividualProbability</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">CumulativeProbability</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERRORRRRRRRRRRRRRRRRR&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;*************** OffspringGeneration3: </span><span class="si">{</span><span class="n">TotalFitnesses</span><span class="si">}</span><span class="s2"> // </span><span class="si">{</span><span class="n">IndividualProbability</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+<span class="c1">#            logging.getLogger(&#39;jakus2020.py&#39;).debug(f&quot;*************** OffspringGeneration3a: idx: {idx} // lenCumulative: {lenCumulative} CumulativeProbability={CumulativeProbability}  len(ParentPairs)={len(ParentPairs)}&quot;)</span>
+            <span class="k">return</span>
+
+        <span class="n">ParentPairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">lenCumulative</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">CumulativeProbability</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;OffspringGeneration&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;*************** OffspringGeneration3: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ParentPairs</span><span class="p">)</span><span class="si">}</span><span class="s2"> // </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">NumParentPairs</span><span class="si">}</span><span class="s2"> // </span><span class="si">{</span><span class="n">lenCumulative</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">ParentPairs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumParentPairs</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">lenCumulative</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">&gt;</span> <span class="n">CumulativeProbability</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">CumulativeProbability</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
+                    <span class="n">ParentPairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]))</span>
+                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1">#logging.getLogger(&#39;jakus2020.py&#39;).debug(f&quot;*************** OffspringGeneration3a: idx: {idx} // lenCumulative: {lenCumulative} CumulativeProbability={CumulativeProbability}  len(ParentPairs)={len(ParentPairs)}&quot;)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">ParentPairs</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.OffspringCrossOver">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.OffspringCrossOver">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">OffspringCrossOver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Parents</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs crossover between parent candidates to generate offspring.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Parents (list): A list containing two parent candidate configurations.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The candidate configuration of the offspring generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#logging.getLogger(&#39;jakus2020.py&#39;).debug(&quot;OffspringCrossOver&quot;)</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">Parents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">b1</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">])</span>
+
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">Parents</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">b2</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">active</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">])</span>
+        
+        <span class="n">parents_and</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">b1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">b2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">))])</span>
+        <span class="n">parents_nand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">b1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">b2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">))])</span>
+
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC2Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">parents_nand</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">parents_and</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">bus_from</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span><span class="n">line</span><span class="o">.</span><span class="n">bus_to</span><span class="o">.</span><span class="n">idtag</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span><span class="o">*</span><span class="mi">10</span>
+
+        <span class="n">graph2</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">Graph2GC</span><span class="p">(</span><span class="n">graph2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">LinesOutofService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">radiality</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span>  <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">radiality</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>   <span class="c1">#if the new candidate is not radiality compliant, it is substituted by one of the parents</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BAD CROSSOVER P1,P2= </span><span class="si">{</span><span class="n">Parents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">Parents</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> child=</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">Parents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Crossover P1,P2= </span><span class="si">{</span><span class="n">Parents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">Parents</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> child=</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">candidate</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.MutationProcess">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.MutationProcess">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">MutationProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes mutation on a given candidate configuration.</span>
+
+<span class="sd">        If a mutation occurs, a random disabled line is activated and a new</span>
+<span class="sd">        minimum spanning tree is generated based on the modified configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate (list): A candidate configuration of the network.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The modified candidate configuration after mutation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MutationProcess&quot;</span><span class="p">)</span>
+        <span class="n">candidateIN</span> <span class="o">=</span> <span class="n">candidate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">mutation_idx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mutation_idx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">MutationProbability</span><span class="p">):</span>
+            <span class="n">ActivatedLine</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="n">candidate</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ActivatedLine</span><span class="p">)</span>
+            <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">candidate</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC2Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mf">100.</span>
+            <span class="n">MinSpanningTree</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;kruskal&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">Graph2GC</span><span class="p">(</span><span class="n">MinSpanningTree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">LinesOutofService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MutationProcess:</span><span class="si">{</span><span class="n">candidateIN</span><span class="si">}</span><span class="s2">-&gt;</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">candidate</span></div>
+
+
+<div class="viewcode-block" id="Jakus2020.Solve">
+<a class="viewcode-back" href="../GC_Jakus2020.html#GC_Jakus2020.Jakus2020.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the distribution network reconfiguration problem.</span>
+
+<span class="sd">        This method runs the genetic algorithm for a specified number of iterations,</span>
+<span class="sd">        generating offspring and selecting the best candidates from the population.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The best candidate configuration found after the iterations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Solve&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">InitialPopulationGeneration</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;---------------------------------------New iter=</span><span class="si">{</span><span class="p">[</span><span class="n">candidate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">candidate</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;---------------------------------------New iter=</span><span class="si">{</span><span class="p">[</span><span class="n">candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">candidate</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Loop for Niter</span>
+        <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Niter</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;---------------------------------------New iter=</span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Offspring generation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ParentPairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ParentsSelection</span><span class="p">()</span>
+            <span class="n">newCandidates</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">Parents</span> <span class="ow">in</span> <span class="n">ParentPairs</span><span class="p">:</span>
+                <span class="n">newCandidateA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OffspringCrossOver</span><span class="p">(</span><span class="n">Parents</span><span class="p">)</span>
+                <span class="n">newCandidateB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OffspringCrossOver</span><span class="p">(</span><span class="n">Parents</span><span class="p">)</span>
+                <span class="c1"># Mutation process from the two offsprings</span>
+                <span class="n">newCandidateA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MutationProcess</span><span class="p">(</span><span class="n">newCandidateA</span><span class="p">)</span>
+                <span class="n">newCandidateB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MutationProcess</span><span class="p">(</span><span class="n">newCandidateB</span><span class="p">)</span>
+                <span class="n">FitnessA</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="n">newCandidateA</span><span class="p">)</span>
+                <span class="n">FitnessB</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="n">newCandidateB</span><span class="p">)</span>
+                <span class="n">newCandidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">newCandidateA</span><span class="p">,</span> <span class="n">FitnessA</span><span class="p">))</span>
+                <span class="n">newCandidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">newCandidateB</span><span class="p">,</span> <span class="n">FitnessB</span><span class="p">))</span>
+
+            <span class="c1"># Elitism: Detecting elite individuals from the new candidates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">####change fitness True)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OffspringSize</span><span class="p">):]</span>  <span class="c1"># Remove worst candidates</span>
+            <span class="c1">#newCandidates = sorted(newCandidates, key=lambda x: x[1], reverse=True)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">+</span> <span class="n">newCandidates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">####change fitness True)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;END OF ITER =</span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2"> with best candidate </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;jakus2020.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ITER </span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Return the best candidate configuration</span></div>
+</div>
+
+
+
+    
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">1</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case118.m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;75_77_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_75_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_80_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_97_1&#39;</span><span class="p">,</span> <span class="s1">&#39;94_95_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_94_1&#39;</span><span class="p">,</span> <span class="s1">&#39;105_106_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_103_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_110_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_102_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_99_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_98_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_93_1&#39;</span><span class="p">,</span> <span class="s1">&#39;89_90_1&#39;</span><span class="p">,</span> <span class="s1">&#39;85_88_1&#39;</span><span class="p">,</span> <span class="s1">&#39;82_83_1&#39;</span><span class="p">,</span> <span class="s1">&#39;83_84_1&#39;</span><span class="p">,</span> <span class="s1">&#39;68_81_1&#39;</span><span class="p">,</span> <span class="s1">&#39;62_66_1&#39;</span><span class="p">,</span> <span class="s1">&#39;60_61_1&#39;</span><span class="p">,</span> <span class="s1">&#39;64_65_1&#39;</span><span class="p">,</span> <span class="s1">&#39;59_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;63_64_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_55_1&#39;</span><span class="p">,</span> <span class="s1">&#39;55_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_51_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_50_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_54_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;45_46_1&#39;</span><span class="p">,</span> <span class="s1">&#39;46_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_37_1&#39;</span><span class="p">,</span> <span class="s1">&#39;37_39_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_42_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_41_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_19_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_17_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_32_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_25_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_31_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_113_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_28_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;24_72_1&#39;</span><span class="p">,</span> <span class="s1">&#39;19_20_1&#39;</span><span class="p">,</span> <span class="s1">&#39;4_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;8_30_1&#39;</span><span class="p">,</span> <span class="s1">&#39;3_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_14_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_16_1&#39;</span><span class="p">,</span> <span class="s1">&#39;5_6_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_18_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;47_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_78_1&#39;</span><span class="p">,</span> <span class="s1">&#39;70_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_70_1&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original network:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">TieLinesID</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+
+    <span class="n">hypers</span> <span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">hyper</span> <span class="ow">in</span> <span class="n">hypers</span><span class="p">:</span>
+        <span class="c1"># Create an MSTgreedy object</span>
+        <span class="n">jakus</span> <span class="o">=</span> <span class="n">Jakus2020</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">Niter</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">,</span> <span class="n">PopulationSize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ElitePopulation</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">MutationProbability</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="c1"># Solve the Minimum Spanning Tree problem</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">jakus</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span>
+        <span class="c1"># Print the list of disabled line indices</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">jakus</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hyper</span><span class="si">}</span><span class="s2"> The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">jakus</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hyper</span><span class="si">}</span><span class="s2"> The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">jakus</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

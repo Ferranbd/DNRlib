@@ -1,0 +1,599 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_Khalil_Gorpinich2012 &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_Khalil_Gorpinich2012</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_Khalil_Gorpinich2012</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span> 
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+<div class="viewcode-block" id="BPSO">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BPSO</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Binary Particle Swarm Optimization (BPSO) class for optimizing network configurations.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        net: An object representing the network to be optimized.</span>
+<span class="sd">        NumCandidates: Number of candidate solutions to generate.</span>
+<span class="sd">        NumOffLines: Number of lines that can be taken out of service.</span>
+<span class="sd">        order: Optional parameter for ordering.</span>
+<span class="sd">        flagUsed: Flag indicating whether to use certain properties.</span>
+<span class="sd">        shuffled: Flag indicating whether to shuffle candidates.</span>
+<span class="sd">        verbose_logging: Logging level for debug messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BPSO.__init__">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">NumCandidates</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the BPSO with the given parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            net: Network object for optimization.</span>
+<span class="sd">            NumCandidates: Number of candidate solutions.</span>
+<span class="sd">            order: Order for configurations, if any.</span>
+<span class="sd">            flagUsed: Whether to use specific properties.</span>
+<span class="sd">            shuffled: Whether to shuffle candidates.</span>
+<span class="sd">            verbose_logging: Logging level for debug messages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># PSO parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">NumCandidates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">TieLines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gbest</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">))]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span> <span class="o">=</span> <span class="n">loss_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span> <span class="o">=</span> <span class="n">fitness_ratio</span>
+<span class="c1">#        self.NumOffLines : int = self.net.NumLines - self.net.NumBuses + 1  # Calculate out-of-service lines</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">SearchLoopsLines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>      <span class="c1">#following the paper, it should be shuffle=True, but not works properly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumOffLines</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Set logging level for the BPSO class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span>  <span class="c1"># Create a logger object for debug messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbose_logging</span><span class="p">)</span>  <span class="c1"># Set the logging level for debug messages</span>
+        <span class="c1"># configurate the algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;candidates: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">__FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+    
+            <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span> <span class="n">config</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">fitness</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span><span class="p">,</span> <span class="n">split_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fitness</span>    
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">__powerflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span>
+
+<div class="viewcode-block" id="BPSO.RandomCandidateGenerator">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.RandomCandidateGenerator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RandomCandidateGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1">#the Jakus paper proposed to create the candidates by generating MST with random weights</span>
+        <span class="n">RandomCandidates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">idx</span> <span class="o">=</span><span class="mi">0</span> 
+        <span class="k">while</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">]</span> 
+            <span class="c1">#res, loss = GC_utils.GC_PowerFlow(self.grid, config=candidate)</span>
+            <span class="c1">#res, loss = self.__powerflow(config= candidate)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">(</span><span class="n">config</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">)</span>
+            <span class="n">radiality</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Candidate generator (random)</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="n">loss</span><span class="p">,</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> -- </span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">radiality</span> <span class="ow">and</span> <span class="n">loss</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+                <span class="n">RandomCandidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Candidate generator:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> -- </span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="n">idx</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">RandomCandidates</span></div>
+
+
+<div class="viewcode-block" id="BPSO.DefineActionSpace">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.DefineActionSpace">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">DefineActionSpace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Defines the action space for the optimization based on network configurations.&quot;&quot;&quot;</span>
+        <span class="c1"># Generate the list of loops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ActionSpaceSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumOffLines</span>  <span class="c1"># Set action space size based on out-of-service lines</span></div>
+
+
+<div class="viewcode-block" id="BPSO.config">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configures the BPSO instance by defining the action space and initializing parameters.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DefineActionSpace</span><span class="p">()</span>  <span class="c1"># Define action space based on the current network configuration</span>
+        <span class="c1"># Create initial list of candidates and log their fitness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fpbest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>  <span class="c1"># Initialize personal best fitness values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>  <span class="c1"># Initialize fitness values for all candidates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbest</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">CreateCandidateList</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;candidate[</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">]:</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">idx_best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">idx_best</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Initialize global best candidate as the first candidate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fpbest</span><span class="p">[</span><span class="n">idx_best</span><span class="p">]</span>  <span class="c1"># Initialize global best fitness as the one for the first candidate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">r1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ActionSpaceSize</span><span class="p">)</span>  <span class="c1"># Random values for local search</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ActionSpaceSize</span><span class="p">)</span>  <span class="c1"># Random values for global search</span></div>
+
+
+<div class="viewcode-block" id="BPSO.getConvergeceList">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.getConvergeceList">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getConvergeceList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span></div>
+
+
+
+<div class="viewcode-block" id="BPSO.SortCandidates">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.SortCandidates">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SortCandidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Candidates</span><span class="p">,</span> <span class="n">Loops</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SortCandidates&quot;</span><span class="p">)</span>
+        <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;Loops to match {Loops}&quot;)</span>
+        <span class="n">SortedCandidates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">Candidates</span><span class="p">:</span>
+            <span class="c1">#print(&quot;######## Candidate &quot;, candidate)</span>
+            <span class="n">sorted_candidate</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">occurrences</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">sublist</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">Loops</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">]</span>
+            <span class="n">occurrences_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">occurrences</span><span class="p">)</span>
+            <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;Candidate {candidate} occurences_array:{occurrences_array}&quot;)</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">persistence</span><span class="p">:</span>
+                <span class="n">persistence</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">column_summary</span> <span class="o">=</span> <span class="n">occurrences_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;occurences_array:{occurrences_array}&quot;)</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;column_summary {column_summary}&quot;)</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_summary</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">sorted_candidate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                        <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">row_summary</span> <span class="o">=</span> <span class="n">occurrences_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;occurences_array:{occurrences_array}&quot;)</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;sorted candidate: {sorted_candidate}&quot;)</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;row_summary {row_summary}&quot;)</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_summary</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;Candidate:{int(candidate[idx])} row:{idx} - {occurrences_array[idx, :]} found:{idx_candidate}&quot;)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;idx_candidate:</span><span class="si">{</span><span class="n">idx_candidate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">sorted_candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                        <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx_candidate</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1">#print(&quot;sorted candidate:&quot;, sorted_candidate)</span>
+                <span class="k">if</span> <span class="n">persistence</span><span class="p">:</span>
+                    <span class="c1">#print(&quot;persistence&quot;)</span>
+                    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_summary</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">element</span><span class="p">:</span>
+                            <span class="n">persistence</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">idx_candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="c1">#print(f&quot;Candidate:{int(candidate[idx_candidate[0]])} column:{idx} - {occurrences_array[:, idx]} found:{idx_candidate}&quot;)</span>
+                            <span class="n">sorted_candidate</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                            <span class="n">occurrences_array</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">occurrences_array</span><span class="p">[</span><span class="n">idx_candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">break</span>
+                <span class="c1">#logging.getLogger(&#39;bpso.py&#39;).debug(f&quot;FINAL sorted candidate: {sorted_candidate}&quot;)</span>
+            <span class="n">SortedCandidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">sorted_candidate</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">SortedCandidates</span></div>
+
+
+
+<div class="viewcode-block" id="BPSO.CalculateFitness">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.CalculateFitness">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CalculateFitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the fitness of a candidate configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate: List of selected configurations to evaluate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple containing the fitness value and a boolean indicating if the configuration is valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                        <span class="n">selected_configuration</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">configuration</span><span class="p">),</span>
+                                        <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">radialconnected</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">radialconnected</span><span class="p">:</span>
+            <span class="c1">#_,losses = GC_utils.GC_PowerFlow(self.grid)  # Compute power flow for the network</span>
+            <span class="c1">#_, losses = self.__powerflow()</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">()</span>
+            <span class="n">fitness_value</span> <span class="o">=</span> <span class="n">losses</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;network.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The configuration is complaint with the radiality constraint and has a fitness=</span><span class="si">{</span><span class="n">fitness_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">fitness_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;network.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The configuration does not comply with the radiality constraint&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>  <span class="c1"># Return infinite fitness for invalid configurations</span></div>
+
+
+
+<div class="viewcode-block" id="BPSO.UpdateCandidateFitness">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateFitness">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">UpdateCandidateFitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the fitness of a specific candidate and updates personal and global bests if needed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate_idx: Index of the candidate to update.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A boolean indicating if the candidate configuration is valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fitness_Value</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateFitness</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitness_Value</span>  <span class="c1"># Update the fitness of the candidate</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="c1"># Updating personal best (pbest)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">fpbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fpbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># Updating global best (gbest)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;bpso.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2"> new gbest= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="si">}</span><span class="s2"> with fitness=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;       bad valid candidate  </span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2"> -- </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2"> -- </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="BPSO.CreateCandidateList">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.CreateCandidateList">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CreateCandidateList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a list of candidates and evaluates their fitness.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;create candidates&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ActionSpaceSize</span><span class="p">))</span>  <span class="c1"># Initialize candidate configurations</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">]</span>
+
+        <span class="c1"># Add, as first candidates, the ones passed as &quot;TieLines&quot; argument to the algorithm</span>
+        <span class="c1"># Generate candidates until the specified number is reached</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RandomCandidateGenerator</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TieLines: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TieLines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Candidates: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1">#convert and adapt the Candidates list</span>
+        <span class="c1">#self.Candidates = np.array(self.Candidates)  # Convert list to numpy array for efficient processing</span>
+        <span class="c1">#self.Candidates = [[int(element) for element in sublist] for sublist in self.Candidates]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SortCandidates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>     <span class="c1">#initialize the particular best to the initial value of the candidates</span>
+
+        <span class="k">for</span> <span class="n">idx_candidates</span><span class="p">,</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UpdateCandidateFitness</span><span class="p">(</span><span class="n">idx_candidates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fpbest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+        <span class="c1">#for candidate in self.Candidates:</span>
+        <span class="c1">#    self.logger.debug(candidate)</span>
+
+<div class="viewcode-block" id="BPSO.CalculateNewPosition">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.CalculateNewPosition">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CalculateNewPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_idx</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the new position of a candidate based on its velocity and best known positions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate_idx: Index of the candidate whose position is being updated.</span>
+<span class="sd">            c1: Cognitive coefficient for personal best influence.</span>
+<span class="sd">            c2: Social coefficient for global best influence.</span>
+<span class="sd">            w: Inertia weight for velocity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple of the new candidate position and the updated velocity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Copy the current candidate position</span>
+        <span class="n">oldValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Copy for reference during updates</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ActionSpaceSize</span><span class="p">):</span>
+            <span class="n">old_value</span> <span class="o">=</span> <span class="n">oldValue</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">gbest_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="c1"># Index of the global best in the action space</span>
+            <span class="c1">#self.logger.debug(f&quot;\taa {candidate_idx},{j}&quot;)</span>
+            <span class="c1">#self.logger.debug(f&quot;\tbb {self.pbest[candidate_idx][j]}&quot;)</span>
+            <span class="c1">#self.logger.debug(f&quot;\tcc {self.NetworkLoops[j]}&quot;)</span>
+            <span class="n">pbest_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>  <span class="c1"># Index of the personal best</span>
+            <span class="n">cand_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">oldValue</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>  <span class="c1"># Index of the current candidate</span>
+
+            <span class="c1"># Calculate distances for velocity updates</span>
+            <span class="n">global_distance</span> <span class="o">=</span> <span class="n">gbest_idx</span> <span class="o">-</span> <span class="n">cand_idx</span>
+            <span class="n">local_distance</span> <span class="o">=</span> <span class="n">pbest_idx</span> <span class="o">-</span> <span class="n">cand_idx</span>
+
+            <span class="c1"># Calculate corrections based on distances and randomness</span>
+            <span class="n">global_correction</span> <span class="o">=</span> <span class="n">c2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">global_distance</span>
+            <span class="n">local_correction</span> <span class="o">=</span> <span class="n">c1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">local_distance</span>
+
+            <span class="n">prev_velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>  <span class="c1"># Store the previous velocity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">local_correction</span> <span class="o">+</span> <span class="n">global_correction</span>
+
+            <span class="c1"># Ensure velocity is within specified limits</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vmin</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vmax</span><span class="p">)</span>
+
+            <span class="c1"># Randomly alter velocity if it hasn&#39;t changed</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="nb">abs</span><span class="p">(</span><span class="n">prev_velocity</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="c1"># Updating particles&#39; coordinate</span>
+            <span class="n">scope</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Scope of available lines on the loop</span>
+
+            <span class="c1"># Sigmoid function to map the velocity to a new position</span>
+            <span class="n">sigmoid</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span> <span class="o">-</span> <span class="mf">0.5</span>  <span class="c1"># Sigmoid function centered at 0</span>
+            <span class="n">newPosition</span> <span class="o">=</span> <span class="n">cand_idx</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">scope</span> <span class="o">*</span> <span class="n">sigmoid</span><span class="p">))</span>  <span class="c1"># Calculate new position based on sigmoid</span>
+
+            <span class="n">newPosition</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">newPosition</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">scope</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Clamp new position within bounds</span>
+            <span class="n">newValue</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">newPosition</span><span class="p">]</span>  <span class="c1"># Update new value for the candidate</span>
+            <span class="c1"># Log details of the update process</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Candidate[</span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">] - loc.dist.//global.dist (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pbest_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">oldValue</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cand_idx</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">local_distance</span><span class="si">}</span><span class="s2"> // </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">gbest_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">oldValue</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cand_idx</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">global_distance</span><span class="si">}</span><span class="s2">  </span><span class="se">\t\t</span><span class="s2"> w//local correction//global correction//wnew//scope//sigmoid//newPosition//old//new value (  </span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">local_correction</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">global_correction</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">sigmoid</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">newPosition</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">old_value</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">newValue</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">newValue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span>  <span class="c1"># Return the new position and updated velocity</span></div>
+
+
+<div class="viewcode-block" id="BPSO.UpdateCandidateNewPosition">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.UpdateCandidateNewPosition">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">UpdateCandidateNewPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_idx</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the position of a candidate based on the BPSO algorithm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            candidate_idx: Index of the candidate to update.</span>
+<span class="sd">            w: Inertia weight for velocity calculation.</span>
+<span class="sd">            c1: Cognitive coefficient for personal best influence.</span>
+<span class="sd">            c2: Social coefficient for global best influence.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Candidate[</span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">  Pbest </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pbest</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">   Gbest </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="si">}</span><span class="s2">  -self.velocity=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate new position and velocity for the candidate</span>
+        <span class="n">old_candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CalculateNewPosition</span><span class="p">(</span><span class="n">candidate_idx</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="c1"># Update fitness for the new candidate position</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">UpdateCandidateFitness</span><span class="p">(</span><span class="n">candidate_idx</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">new Candidate[</span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">new Candidate[</span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not valid, so we dismiss the changes which creates the invalid solution&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_candidate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UpdateCandidateFitness</span><span class="p">(</span><span class="n">candidate_idx</span><span class="p">)</span>  <span class="c1">#update gbest and fgbest, pbest, fpbest</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2"> keep the previuos Candidate[</span><span class="si">{</span><span class="n">candidate_idx</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># @jit(target_backend=&#39;cuda&#39;)</span>
+<div class="viewcode-block" id="BPSO.Solve">
+<a class="viewcode-back" href="../GC_Khalil_Gorpinich2012.html#GC_Khalil_Gorpinich2012.BPSO.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wmax</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">wmin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solves the optimization problem using the BPSO algorithm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wmax: Maximum inertia weight.</span>
+<span class="sd">            wmin: Minimum inertia weight.</span>
+<span class="sd">            beta: Parameter for the sigmoid function.</span>
+<span class="sd">            maxiter: Maximum number of iterations for the optimization.</span>
+<span class="sd">            vmax: Maximum velocity for the particles.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The best global configuration found during optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Main loops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start solving by BPSO&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wmax</span> <span class="o">=</span> <span class="n">wmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wmin</span> <span class="o">=</span> <span class="n">wmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">vmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="n">vmax</span>  <span class="c1"># Set minimum velocity to the negative of max velocity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="n">c1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+                                          <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumOffLines</span><span class="p">))</span>  <span class="c1"># Initialize velocities</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">iter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Iterate for a maximum number of iterations</span>
+        <span class="k">while</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="p">:</span>
+            <span class="nb">iter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Iter </span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> </span><span class="se">\t</span><span class="s2"> Candidates </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\t</span><span class="s2"> iter</span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2">  gbest[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span><span class="si">}</span><span class="s2">   &quot;</span><span class="p">)</span>
+
+            <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wmax</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wmax</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wmin</span><span class="p">)</span> <span class="o">*</span> <span class="nb">iter</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span>  <span class="c1"># Calculate current inertia weight</span>
+<span class="c1">#            self.c1 = 2  # Cognitive coefficient (could be randomized for variability)</span>
+<span class="c1">#            self.c2 = 2  # Social coefficient (could be randomized for variability)</span>
+
+            <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">NetworkLoops</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loop : </span><span class="si">{</span><span class="n">loop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Update the position for each candidate</span>
+            <span class="k">for</span> <span class="n">candidate_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NumCandidates</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">UpdateCandidateNewPosition</span><span class="p">(</span><span class="n">candidate_idx</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ConvergenceList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;    iter</span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2">  gbest[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gbest</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fgbest</span><span class="si">}</span><span class="s2">    candidate[0]:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Candidates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gbest</span>  <span class="c1"># Return the best global candidate found</span></div>
+</div>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">3</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case118.m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;75_77_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_75_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_80_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_97_1&#39;</span><span class="p">,</span> <span class="s1">&#39;94_95_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_94_1&#39;</span><span class="p">,</span> <span class="s1">&#39;105_106_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_103_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_110_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_102_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_99_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_98_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_93_1&#39;</span><span class="p">,</span> <span class="s1">&#39;89_90_1&#39;</span><span class="p">,</span> <span class="s1">&#39;85_88_1&#39;</span><span class="p">,</span> <span class="s1">&#39;82_83_1&#39;</span><span class="p">,</span> <span class="s1">&#39;83_84_1&#39;</span><span class="p">,</span> <span class="s1">&#39;68_81_1&#39;</span><span class="p">,</span> <span class="s1">&#39;62_66_1&#39;</span><span class="p">,</span> <span class="s1">&#39;60_61_1&#39;</span><span class="p">,</span> <span class="s1">&#39;64_65_1&#39;</span><span class="p">,</span> <span class="s1">&#39;59_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;63_64_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_55_1&#39;</span><span class="p">,</span> <span class="s1">&#39;55_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_51_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_50_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_54_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;45_46_1&#39;</span><span class="p">,</span> <span class="s1">&#39;46_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_37_1&#39;</span><span class="p">,</span> <span class="s1">&#39;37_39_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_42_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_41_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_19_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_17_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_32_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_25_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_31_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_113_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_28_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;24_72_1&#39;</span><span class="p">,</span> <span class="s1">&#39;19_20_1&#39;</span><span class="p">,</span> <span class="s1">&#39;4_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;8_30_1&#39;</span><span class="p">,</span> <span class="s1">&#39;3_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_14_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_16_1&#39;</span><span class="p">,</span> <span class="s1">&#39;5_6_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_18_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;47_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_78_1&#39;</span><span class="p">,</span> <span class="s1">&#39;70_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_70_1&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original network:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">TieLinesID</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">hyper</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># Create an MSTgreedy object</span>
+        <span class="n">khalil</span> <span class="o">=</span> <span class="n">BPSO</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLines</span><span class="o">=</span><span class="p">[],</span> <span class="n">NumCandidates</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="c1"># Solve the Minimum Spanning Tree problem</span>
+        <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">khalil</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">wmax</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">wmin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Print the list of disabled line indices</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+        <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hyper</span><span class="si">}</span><span class="s2"> : The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">khalil</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span> <span class="c1">#is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

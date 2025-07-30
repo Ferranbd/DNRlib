@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC_Morton2000 &mdash; DNRlib 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DNRlib
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Baran1989.html">GC_Baran1989 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Jakus2020.html">GC_Jakus2020 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Merlin1975.html">GC_Merlin1975 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Morton2000.html">GC_Morton2000 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_PandaPowerImporter.html">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GC_utils.html">GC_utils module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DNRlib</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">GC_Morton2000</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for GC_Morton2000</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">GridCalEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>  <span class="c1"># For interfacing with the GridCal API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">GridCalEngine.IO.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileOpen</span><span class="p">,</span> <span class="n">FileSave</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">GC_utils</span> 
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>  <span class="c1"># Ignore warnings during execution</span>
+
+
+<div class="viewcode-block" id="Morton2000">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Morton2000</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the Morton 2000 algorithm for optimizing network configurations.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        net: The network object containing distribution network data.</span>
+<span class="sd">        candidates: A list to store candidate network configurations.</span>
+<span class="sd">        initial_loops: Initial loop configurations for the network.</span>
+<span class="sd">        init_config: Initial configuration of the network.</span>
+<span class="sd">        best_power_loss: Variable to track the best (minimum) power loss during optimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Morton2000.__init__">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">init_config</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the Morton2000 class with required parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            net: The network object for optimization.</span>
+<span class="sd">            init_config: The initial configuration of the network.</span>
+<span class="sd">            verbose_logging: Logging level for debug messages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>  <span class="c1"># Set the network object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Initialize an empty list for candidates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_config</span> <span class="o">=</span> <span class="n">init_config</span>  <span class="c1"># Store the initial configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_power_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># Initialize best power loss to infinity</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbose_logging</span><span class="p">)</span>  <span class="c1"># Set logging level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">loads</span><span class="p">))]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span> <span class="o">=</span> <span class="n">loss_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span> <span class="o">=</span> <span class="n">fitness_ratio</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="p">[],</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_loops</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">SearchLoopsLines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">flagUsed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span> <span class="n">config</span><span class="p">,</span> <span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">fitness</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_FitnessCalculation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalLoad</span><span class="p">,</span> <span class="n">loss_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_factor</span><span class="p">,</span> <span class="n">split_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness_ratio</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fitness</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">__powerflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumPF</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">resultPF</span><span class="p">,</span><span class="n">old_losses</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_search_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">present_candidate</span><span class="p">,</span> <span class="n">loops</span><span class="p">,</span> <span class="n">rec_level</span><span class="p">,</span> <span class="n">total_candidates</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively searches for trees in the network based on given loops.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            present_candidate: The current candidate configuration being explored.</span>
+<span class="sd">            loops: The available loops to explore.</span>
+<span class="sd">            rec_level: The current recursion level.</span>
+<span class="sd">            total_candidates: A set of all candidate configurations found so far.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A set of all candidate configurations found during the search.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">present_candidate</span> <span class="o">=</span> <span class="n">present_candidate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Create a copy of the present candidate</span>
+        <span class="n">available_loops</span> <span class="o">=</span> <span class="n">loops</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Create a copy of available loops</span>
+        <span class="n">total_candidates</span> <span class="o">=</span> <span class="n">total_candidates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Create a copy of total candidates</span>
+
+        <span class="c1"># If the number of total candidates exceeds the maximum, return the current candidates</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_candidates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">total_candidates</span>
+
+        <span class="n">any_loop</span> <span class="o">=</span> <span class="n">available_loops</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Remove the first loop to explore</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">any_line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">any_loop</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_candidates</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">total_candidates</span>
+            <span class="n">present_candidate</span><span class="p">[</span><span class="n">rec_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">any_line</span>  <span class="c1"># Set the current line in the candidate configuration</span>
+            <span class="n">added_candidated</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">present_candidate</span><span class="o">.</span><span class="n">copy</span><span class="p">())))</span>  <span class="c1"># Create a sorted tuple for uniqueness</span>
+            <span class="n">total_candidates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">added_candidated</span><span class="p">)</span>  <span class="c1"># Add the candidate to the total candidates set</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">rec_level</span><span class="si">}</span><span class="s2">] Total : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> - New candidate </span><span class="si">{</span><span class="n">added_candidated</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_loops</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># If there are more loops to explore</span>
+                <span class="n">total_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_trees</span><span class="p">(</span><span class="n">present_candidate</span><span class="p">,</span> <span class="n">available_loops</span><span class="p">,</span> <span class="n">rec_level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total_candidates</span><span class="p">)</span>
+            <span class="c1">#print(f&quot;aqui:({idx}): {any_line}&quot;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Enable the current line in the network</span>
+        <span class="k">return</span> <span class="n">total_candidates</span>  <span class="c1"># Return the total candidates found</span>
+
+<div class="viewcode-block" id="Morton2000.SearchTrees">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000.SearchTrees">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SearchTrees</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Starts the search for trees in the network based on initial loops.</span>
+
+<span class="sd">        This method reconfigures the network, initializes candidates, and starts the recursive search for trees.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Start SearchTrees&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tot_candidates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Initialize total candidates as a set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tot_candidates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_config</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>  <span class="c1"># Add initial configuration as a candidate</span>
+        <span class="n">GC_utils</span><span class="o">.</span><span class="n">NetworkReconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">selected_configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init_config</span><span class="p">,</span><span class="n">value_configuration</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loops: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_loops</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Start the recursive search for trees</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tot_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_trees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_loops</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tot_candidates</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Morton2000.RemoveDuplicates">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000.RemoveDuplicates">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RemoveDuplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tot_candidates</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes duplicate candidates from the list of total candidates.</span>
+
+<span class="sd">        This method populates the candidates list with unique configurations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;remove duplicated candidates&quot;</span><span class="p">)</span>
+        <span class="n">clean_candidates</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">len_tot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tot_candidates</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tot_candidates</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clean_candidates</span><span class="p">:</span>  <span class="c1"># Check if the item is already in the unique candidates list</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">)):</span> <span class="c1">#if the network does not have any repeated element (if it has it, it means not radial)</span>
+                    <span class="n">clean_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># Add unique item to the candidates list</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reviewed candidates:</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">len_tot</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tot_candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> candidates&quot;</span><span class="p">)</span>  <span class="c1"># Print the total number of candidates found</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">clean_candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique candidates&quot;</span><span class="p">)</span>  <span class="c1"># Print the number of unique candidates found</span>
+    
+        <span class="k">return</span> <span class="n">clean_candidates</span></div>
+
+    
+<div class="viewcode-block" id="Morton2000.ChooseBestTree">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000.ChooseBestTree">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ChooseBestTree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Chooses the best tree configuration based on the lowest power loss.</span>
+
+<span class="sd">        This method tests each candidate configuration and tracks the configuration with the lowest power loss.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The best tree configuration and the associated power flow results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;choose best tree&quot;</span><span class="p">)</span>
+        <span class="n">best_tree</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Initialize the best tree configuration</span>
+        <span class="n">pf_result</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Initialize a list to store power flow results</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Index to track progress</span>
+        <span class="c1">#best_power_loss = np.inf  # Initialize best power loss to infinity</span>
+        <span class="n">best_fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># Initialize best power loss to infinity</span>
+
+        <span class="n">len_candidates</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">candidates</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">candidate_tree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidates</span><span class="p">:</span>  <span class="c1"># Iterate through each candidate configuration</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tested candidates:</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">len_candidates</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Reconfigure the network with the current candidate configuration</span>
+            <span class="c1">#_,losses = GC_utils.GC_PowerFlow(self.grid, config=candidate_tree)</span>
+            <span class="n">fitness</span>  <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">candidate_tree</span><span class="p">)</span>
+            <span class="n">validTree</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tested candidate:</span><span class="si">{</span><span class="n">candidate_tree</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="n">fitness</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">validTree</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">validTree</span><span class="p">:</span>  <span class="c1"># If the configuration is valid</span>
+                <span class="n">fitness</span>  <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__FitnessCalculation</span><span class="p">()</span>
+                <span class="c1">##_, losses = GC_utils.GC_PowerFlow(self.grid)# Calculate power flow for the current configuration</span>
+                <span class="n">pf_result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span>  <span class="c1"># Store the power flow result</span>
+                <span class="c1"># Check if the current power loss is less than the best found</span>
+                <span class="k">if</span> <span class="n">best_fitness</span> <span class="o">&gt;</span> <span class="n">fitness</span><span class="p">:</span>
+                    <span class="n">best_fitness</span> <span class="o">=</span> <span class="n">fitness</span>  <span class="c1"># Update best power loss</span>
+                    <span class="n">best_tree</span> <span class="o">=</span> <span class="n">candidate_tree</span>  <span class="c1"># Update the best tree configuration</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pf_result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>  <span class="c1"># Append infinity if the configuration is invalid</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;new best: </span><span class="si">{</span><span class="n">best_tree</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">best_fitness</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># Print the best configuration found</span>
+
+        <span class="k">return</span> <span class="n">best_tree</span><span class="p">,</span> <span class="n">pf_result</span>  <span class="c1"># Return the best tree and power flow results</span></div>
+
+
+<div class="viewcode-block" id="Morton2000.Solve">
+<a class="viewcode-back" href="../GC_Morton2000.html#GC_Morton2000.Morton2000.Solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_candidates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main method to solve the network optimization problem.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_candidates: The maximum number of candidate configurations to consider.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The best tree configuration and associated results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;morton2000.py&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start solving Morton 2000 (brute force)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_candidates</span> <span class="o">=</span> <span class="n">max_candidates</span>  <span class="c1"># Set the maximum number of candidates</span>
+        <span class="c1"># The following methods can be uncommented to run the full optimization process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SearchTrees</span><span class="p">()</span>  <span class="c1"># Search for candidate trees</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">RemoveDuplicates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tot_candidates</span><span class="p">)</span>  <span class="c1"># Remove duplicates from the candidates</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> possible networks&quot;</span><span class="p">)</span>
+        <span class="n">best</span><span class="p">,</span> <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ChooseBestTree</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">best</span>  <span class="c1"># Choose the best tree from the candidates</span></div>
+</div>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Algorithms to find the optimal distribution network configuration&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>  <span class="c1"># Set the log level to DEBUG</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Set the log format</span>
+        <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>  <span class="c1"># Set the date format</span>
+    <span class="p">)</span>
+
+    <span class="n">case</span><span class="o">=</span><span class="mi">3</span>
+    <span class="c1"># Create a network object</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case33.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;line 32&#39;</span><span class="p">,</span><span class="s1">&#39;line 33&#39;</span><span class="p">,</span><span class="s1">&#39;line 34&#39;</span><span class="p">,</span><span class="s1">&#39;line 35&#39;</span><span class="p">,</span><span class="s1">&#39;line 36&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case69.gridcal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;line 57&#39;</span><span class="p">,</span><span class="s1">&#39;line 10&#39;</span><span class="p">,</span><span class="s1">&#39;line 69&#39;</span><span class="p">,</span><span class="s1">&#39;line 14&#39;</span><span class="p">,</span><span class="s1">&#39;line 19&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">FileOpen</span><span class="p">(</span><span class="s2">&quot;D:</span><span class="se">\\</span><span class="s2">15_Thesis-code</span><span class="se">\\</span><span class="s2">DistributionNetwork_libraries</span><span class="se">\\</span><span class="s2">NetworkExamples</span><span class="se">\\</span><span class="s2">gridcal</span><span class="se">\\</span><span class="s2">case118.m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="n">TieLinesName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;75_77_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_75_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_80_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_97_1&#39;</span><span class="p">,</span> <span class="s1">&#39;94_95_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_94_1&#39;</span><span class="p">,</span> <span class="s1">&#39;105_106_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_103_1&#39;</span><span class="p">,</span> <span class="s1">&#39;100_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_110_1&#39;</span><span class="p">,</span> <span class="s1">&#39;103_104_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_102_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_99_1&#39;</span><span class="p">,</span> <span class="s1">&#39;80_98_1&#39;</span><span class="p">,</span> <span class="s1">&#39;92_93_1&#39;</span><span class="p">,</span> <span class="s1">&#39;89_90_1&#39;</span><span class="p">,</span> <span class="s1">&#39;85_88_1&#39;</span><span class="p">,</span> <span class="s1">&#39;82_83_1&#39;</span><span class="p">,</span> <span class="s1">&#39;83_84_1&#39;</span><span class="p">,</span> <span class="s1">&#39;68_81_1&#39;</span><span class="p">,</span> <span class="s1">&#39;62_66_1&#39;</span><span class="p">,</span> <span class="s1">&#39;60_61_1&#39;</span><span class="p">,</span> <span class="s1">&#39;64_65_1&#39;</span><span class="p">,</span> <span class="s1">&#39;59_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;63_64_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_55_1&#39;</span><span class="p">,</span> <span class="s1">&#39;55_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;54_56_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_51_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_50_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_54_1&#39;</span><span class="p">,</span> <span class="s1">&#39;49_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;45_46_1&#39;</span><span class="p">,</span> <span class="s1">&#39;46_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_37_1&#39;</span><span class="p">,</span> <span class="s1">&#39;37_39_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_42_1&#39;</span><span class="p">,</span> <span class="s1">&#39;40_41_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_19_1&#39;</span><span class="p">,</span> <span class="s1">&#39;15_17_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_32_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_25_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_31_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_113_1&#39;</span><span class="p">,</span> <span class="s1">&#39;27_28_1&#39;</span><span class="p">,</span> <span class="s1">&#39;23_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;24_72_1&#39;</span><span class="p">,</span> <span class="s1">&#39;19_20_1&#39;</span><span class="p">,</span> <span class="s1">&#39;4_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;8_30_1&#39;</span><span class="p">,</span> <span class="s1">&#39;3_5_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_14_1&#39;</span><span class="p">,</span> <span class="s1">&#39;12_16_1&#39;</span><span class="p">,</span> <span class="s1">&#39;5_6_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;17_18_1&#39;</span><span class="p">,</span> <span class="s1">&#39;34_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;47_69_1&#39;</span><span class="p">,</span> <span class="s1">&#39;77_78_1&#39;</span><span class="p">,</span> <span class="s1">&#39;70_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;69_70_1&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">case</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandapower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">simbench</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">GC_PandaPowerImporter</span>
+        <span class="n">sb_code1</span> <span class="o">=</span> <span class="s2">&quot;1-HVMV-urban-2.203-0-no_sw&quot;</span>
+        <span class="n">gridPP</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">get_simbench_net</span><span class="p">(</span><span class="n">sb_code1</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">234</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">238</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span><span class="mi">244</span><span class="p">,</span><span class="mi">246</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">trafo</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">139</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">161</span><span class="p">,</span><span class="mi">166</span><span class="p">,</span><span class="mi">170</span><span class="p">,</span><span class="mi">173</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">180</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">187</span><span class="p">,</span><span class="mi">188</span><span class="p">,</span><span class="mi">208</span><span class="p">,</span><span class="mi">223</span><span class="p">,</span><span class="mi">225</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">229</span><span class="p">,</span><span class="mi">230</span><span class="p">,</span><span class="mi">231</span><span class="p">,</span><span class="mi">227</span><span class="p">,</span><span class="mi">232</span><span class="p">,</span><span class="mi">233</span><span class="p">]),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">ext_grid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;grid_ext&quot;</span>
+        <span class="n">gridPP</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="s1">&#39;in_service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pp</span><span class="o">.</span><span class="n">runpp</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">gridGC</span> <span class="o">=</span> <span class="n">GC_PandaPowerImporter</span><span class="o">.</span><span class="n">PP2GC</span><span class="p">(</span><span class="n">gridPP</span><span class="p">)</span>
+        <span class="n">TieLinesName</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1_2_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_24_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_36_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_47_1&#39;</span><span class="p">,</span> <span class="s1">&#39;51_52_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_60_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_74_1&#39;</span><span class="p">,</span> <span class="s1">&#39;1_85_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_117_1&#39;</span><span class="p">,</span> <span class="s1">&#39;117_125_1&#39;</span><span class="p">,</span> <span class="s1">&#39;127_164_1&#39;</span><span class="p">,</span> <span class="s1">&#39;121_188_1&#39;</span><span class="p">,</span> <span class="s1">&#39;146_147_1&#39;</span><span class="p">,</span> <span class="s1">&#39;171_181_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_196_1&#39;</span><span class="p">,</span> <span class="s1">&#39;116_154_1&#39;</span><span class="p">]</span>
+
+    <span class="n">TieLinesID</span><span class="o">=</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_Name2idtag_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">TieLinesName</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original network:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_Line_idtag2name_array</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span><span class="n">TieLinesID</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">)</span>
+
+    <span class="c1"># Create an Morton2000 object</span>
+    <span class="n">morton</span> <span class="o">=</span> <span class="n">Morton2000</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">init_config</span><span class="o">=</span><span class="n">TieLinesID</span><span class="p">,</span> <span class="n">fitness_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss_factor</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">verbose_logging</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+    <span class="c1"># Solve the Minimum Spanning Tree problem</span>
+    <span class="n">disabled_lines</span> <span class="o">=</span> <span class="n">morton</span><span class="o">.</span><span class="n">Solve</span><span class="p">()</span> <span class="c1">#max_candidates=100)</span>
+    
+    <span class="c1"># Print the list of disabled line indices</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">disabled_lines</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span><span class="n">loss</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">GC_PowerFlow</span><span class="p">(</span><span class="n">gridGC</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">disabled_lines</span><span class="p">)</span>
+    <span class="n">radiality</span> <span class="o">=</span> <span class="n">GC_utils</span><span class="o">.</span><span class="n">CheckRadialConnectedNetwork</span><span class="p">(</span><span class="n">gridGC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The new optimal configuration losses:</span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">, radiality:</span><span class="si">{</span><span class="n">radiality</span><span class="si">}</span><span class="s2">, numPF:</span><span class="si">{</span><span class="n">morton</span><span class="o">.</span><span class="n">NumPF</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># is {GC_utils.GC_Line_idtag2name_array(gridGC, disabled_lines)}&quot; )</span>
+    <span class="c1">#the solution for the case33 is (&#39;line 13&#39;, &#39;line 31&#39;, &#39;line 36&#39;, &#39;line 6&#39;, &#39;line 8&#39;) 139551.3472210437</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CITCEA.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
