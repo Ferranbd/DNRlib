@@ -25,9 +25,3 @@ Description of the DNRlib, a Python library for learning the basics of Distribut
    GC_PandaPowerImporter
    GC_utils
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
