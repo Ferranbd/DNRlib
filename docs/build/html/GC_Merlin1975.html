@@ -49,7 +49,16 @@
 <li class="toctree-l1"><a class="reference internal" href="GC_Jakus2020.html">GC_Jakus2020 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_Merlin1975 module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_Merlin1975 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#GC_Merlin1975.Merlin1975"><code class="docutils literal notranslate"><span class="pre">Merlin1975</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Merlin1975.Merlin1975.net"><code class="docutils literal notranslate"><span class="pre">Merlin1975.net</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Merlin1975.Merlin1975.SearchMinFlow"><code class="docutils literal notranslate"><span class="pre">Merlin1975.SearchMinFlow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Merlin1975.Merlin1975.Solve"><code class="docutils literal notranslate"><span class="pre">Merlin1975.Solve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Merlin1975.Merlin1975.__init__"><code class="docutils literal notranslate"><span class="pre">Merlin1975.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Morton2000.html">GC_Morton2000 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
@@ -81,8 +90,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gc-merlin1975-module">
-<h1>GC_Merlin1975 module<a class="headerlink" href="#gc-merlin1975-module" title="Link to this heading"></a></h1>
+  <section id="module-GC_Merlin1975">
+<span id="gc-merlin1975-module"></span><h1>GC_Merlin1975 module<a class="headerlink" href="#module-GC_Merlin1975" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="GC_Merlin1975.Merlin1975">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">GC_Merlin1975.</span></span><span class="sig-name descname"><span class="pre">Merlin1975</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Merlin1975.html#Merlin1975"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Merlin1975.Merlin1975" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Implementation of the Merlin 1975 algorithm for optimizing network configurations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Merlin1975.Merlin1975.net">
+<span class="sig-name descname"><span class="pre">net</span></span><a class="headerlink" href="#GC_Merlin1975.Merlin1975.net" title="Link to this definition"></a></dt>
+<dd><p>The network object that contains information about the distribution network.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Merlin1975.Merlin1975.SearchMinFlow">
+<span class="sig-name descname"><span class="pre">SearchMinFlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">banned</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Merlin1975.html#Merlin1975.SearchMinFlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Merlin1975.Merlin1975.SearchMinFlow" title="Link to this definition"></a></dt>
+<dd><p>Searches for the line with the minimum current flow that is not banned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>banned</strong> – List of indices of banned lines.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the line with minimum current flow if available; otherwise, -1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Merlin1975.Merlin1975.Solve">
+<span class="sig-name descname"><span class="pre">Solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Merlin1975.html#Merlin1975.Solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Merlin1975.Merlin1975.Solve" title="Link to this definition"></a></dt>
+<dd><p>Solves the optimization problem using the Merlin 1975 algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of lines that are out of service after optimization.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Merlin1975.Merlin1975.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Merlin1975.html#Merlin1975.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Merlin1975.Merlin1975.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the Merlin1975 class with a network object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> – The network object for optimization.</p></li>
+<li><p><strong>verbose_logging</strong> – Logging level for debug messages.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

@@ -10,9 +10,10 @@ Description of the DNRlib, a Python library for learning the basics of Distribut
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
+   modules
    GC_DistributionNetworkReconfiguration  
    GC_Baran1989
    GC_Jakus2020

@@ -1,7 +1,7 @@
 import os
 import sys
 # sys.path.insert(0, os.path.abspath('.')) # This points to the current dir (docs/source), not your project root
-sys.path.insert(0, os.path.abspath('../../src')) # Adjust this path to point to your project root
+sys.path.insert(0, os.path.abspath('../../src/DNRlib')) # Adjust this path to point to your project root
 # If your source code is directly in 'my_project_root/my_package_name', you might need:
 # sys.path.insert(0, os.path.abspath('../..'))
 # If your source code is in 'my_project_root/src/my_package_name', you might need:

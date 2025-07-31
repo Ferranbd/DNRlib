@@ -53,7 +53,11 @@
 <li class="toctree-l1"><a class="reference internal" href="GC_Morton2000.html">GC_Morton2000 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Salkuti2021.html">GC_Salkuti2021 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Taylor2012_pyomo.html">GC_Taylor2012_pyomo module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_PandaPowerImporter module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_PandaPowerImporter module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#GC_PandaPowerImporter.PP2GC"><code class="docutils literal notranslate"><span class="pre">PP2GC()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#GC_PandaPowerImporter.convert_mat_to_m"><code class="docutils literal notranslate"><span class="pre">convert_mat_to_m()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="GC_utils.html">GC_utils module</a></li>
 </ul>
 
@@ -81,8 +85,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gc-pandapowerimporter-module">
-<h1>GC_PandaPowerImporter module<a class="headerlink" href="#gc-pandapowerimporter-module" title="Link to this heading"></a></h1>
+  <section id="module-GC_PandaPowerImporter">
+<span id="gc-pandapowerimporter-module"></span><h1>GC_PandaPowerImporter module<a class="headerlink" href="#module-GC_PandaPowerImporter" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_PandaPowerImporter.PP2GC">
+<span class="sig-prename descclassname"><span class="pre">GC_PandaPowerImporter.</span></span><span class="sig-name descname"><span class="pre">PP2GC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridPP</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_PandaPowerImporter.html#PP2GC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_PandaPowerImporter.PP2GC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="GC_PandaPowerImporter.convert_mat_to_m">
+<span class="sig-prename descclassname"><span class="pre">GC_PandaPowerImporter.</span></span><span class="sig-name descname"><span class="pre">convert_mat_to_m</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_m_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_PandaPowerImporter.html#convert_mat_to_m"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_PandaPowerImporter.convert_mat_to_m" title="Link to this definition"></a></dt>
+<dd><p>Convert a MATPOWER .mat file to a .m file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_mat_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the input .mat file containing the MATPOWER case.</p></li>
+<li><p><strong>output_m_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the output .m file to be created.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

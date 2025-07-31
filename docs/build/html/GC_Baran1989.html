@@ -45,7 +45,17 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="GC_DistributionNetworkReconfiguration.html">GC_DistributionNetworkReconfiguration module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_Baran1989 module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_Baran1989 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#GC_Baran1989.Baran1989"><code class="docutils literal notranslate"><span class="pre">Baran1989</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Baran1989.Baran1989.net"><code class="docutils literal notranslate"><span class="pre">Baran1989.net</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Baran1989.Baran1989.initial_config"><code class="docutils literal notranslate"><span class="pre">Baran1989.initial_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Baran1989.Baran1989.logger"><code class="docutils literal notranslate"><span class="pre">Baran1989.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Baran1989.Baran1989.Solve"><code class="docutils literal notranslate"><span class="pre">Baran1989.Solve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#GC_Baran1989.Baran1989.__init__"><code class="docutils literal notranslate"><span class="pre">Baran1989.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Jakus2020.html">GC_Jakus2020 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_MSTgreedy.html">GC_MSTgreedy module</a></li>
@@ -81,8 +91,83 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gc-baran1989-module">
-<h1>GC_Baran1989 module<a class="headerlink" href="#gc-baran1989-module" title="Link to this heading"></a></h1>
+  <section id="module-GC_Baran1989">
+<span id="gc-baran1989-module"></span><h1>GC_Baran1989 module<a class="headerlink" href="#module-GC_Baran1989" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">GC_Baran1989.</span></span><span class="sig-name descname"><span class="pre">Baran1989</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TieLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitness_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Baran1989.html#Baran1989"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Baran1989.Baran1989" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for solving the Baran 1989 test feeder network problem.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989.net">
+<span class="sig-name descname"><span class="pre">net</span></span><a class="headerlink" href="#GC_Baran1989.Baran1989.net" title="Link to this definition"></a></dt>
+<dd><p>The distribution network object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DistributionNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989.initial_config">
+<span class="sig-name descname"><span class="pre">initial_config</span></span><a class="headerlink" href="#GC_Baran1989.Baran1989.initial_config" title="Link to this definition"></a></dt>
+<dd><p>The initial tie line configuration. Defaults to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#GC_Baran1989.Baran1989.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger object for debug messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)">logging.Logger</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989.Solve">
+<span class="sig-name descname"><span class="pre">Solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Baran1989.html#Baran1989.Solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Baran1989.Baran1989.Solve" title="Link to this definition"></a></dt>
+<dd><p>Solves the Baran 1989 problem by finding the best tie line configuration that minimizes power losses.</p>
+<p>This function iterates through all loops in the initial network and tries opening/closing tie lines
+within each loop. It then checks for radial connectivity and performs power flow analysis to determine
+the power losses. The configuration with the minimum losses is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – An order for iterating through loops (not used in this implementation). Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The best tie line configuration that minimizes power losses.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="GC_Baran1989.Baran1989.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TieLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitness_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_Baran1989.html#Baran1989.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_Baran1989.Baran1989.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the Baran1989 class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>DistributionNetwork</em>) – The distribution network object.</p></li>
+<li><p><strong>TieLines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – The initial tie line configuration. Defaults to None.</p></li>
+<li><p><strong>verbose_logging</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The logging level for debug messages. Defaults to logging.WARNING.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
