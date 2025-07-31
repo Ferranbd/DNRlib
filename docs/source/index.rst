@@ -6,9 +6,7 @@
 DNRlib documentation
 ====================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Description of the DNRlib, a Python library for learning the basics of Distribution Network Reconfiguration (DNR), by using several methods published in papers from 1975 up to today.
 
 
 .. toctree::
