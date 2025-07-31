@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DNRlib" 
+version = "0.1.0" 
+authors = [
+  { name="Ferran Bohigas i Daranas", email="ferran.bohigas@upc.edu" },
+]
+description = "Library with Distribution Network Reconfiguration methods, for an easy introduction to this topic"
+readme = "README.md"
+requires-python = ">=3.8" # Minimum Python version required
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License", 
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta", # (1 - Planning, 2 - Pre-Alpha, 3 - Alpha, 4 - Beta, 5 - Production/Stable, 6 - Mature, 7 - Inactive)
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["Distribution Network Reconfiguration", "DNR"]
+
+[project.urls]
+Homepage = "https://github.com/Ferranbd/DNRlib" 
+"Bug Tracker" = "https://github.com/Ferranbd/DNRlib/issues"
+"Documentation" = "https://dnrlib.readthedocs.io/" # Your ReadTheDocs URL
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "twine",
+    "build",
+    "sphinx", # If you use Sphinx for docs
+    "sphinx_rtd_theme", # If you use ReadTheDocs theme for Sphinx
+]
+
+[project.scripts]
+#your-cli-command = "your_package_name.your_module:main_function" # If you have a command-line entry point
+
+[project.dependencies]
+networkx==3.5
+numpy==2.3.2
+pandas==2.2.6
+matplotlib==3.10.3
+gridcalengine==5.3.53
+pandapower==3.1.2
+simbench==1.6.1
+pyomo==6.9.2
+ipykernel==6.30.0
+seaborn==0.13.2
+sphinx==8.2.3
+sphinx_rtd_theme==3.0.2
+rst-to-myst[sphinx]==0.4.0
+myst_parser==4.0.1
+sphinx_autodoc_typehints==3.2.0
+numpydoc==1.9.0

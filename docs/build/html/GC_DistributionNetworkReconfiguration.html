@@ -44,14 +44,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_DistributionNetworkReconfiguration module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration"><code class="docutils literal notranslate"><span class="pre">DistributionNetworkReconfiguration</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.Solve"><code class="docutils literal notranslate"><span class="pre">DistributionNetworkReconfiguration.Solve()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.__init__"><code class="docutils literal notranslate"><span class="pre">DistributionNetworkReconfiguration.__init__()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GC_DistributionNetworkReconfiguration module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Baran1989.html">GC_Baran1989 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Jakus2020.html">GC_Jakus2020 module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GC_Khalil_Gorpinich2012.html">GC_Khalil_Gorpinich2012 module</a></li>
@@ -88,38 +81,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-GC_DistributionNetworkReconfiguration">
-<span id="gc-distributionnetworkreconfiguration-module"></span><h1>GC_DistributionNetworkReconfiguration module<a class="headerlink" href="#module-GC_DistributionNetworkReconfiguration" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">GC_DistributionNetworkReconfiguration.</span></span><span class="sig-name descname"><span class="pre">DistributionNetworkReconfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_DistributionNetworkReconfiguration.html#DistributionNetworkReconfiguration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Library of Distribution Network Reconfiguration algorithms
-Constraints : radial topology without unconnected nodes
-Available algorithms :
-- Heuristic : Baran (1989), Merlin (1975), Morton (2000), MSTgreedy, Salkuti (2021)
-- Metaheuristic : Jakus (2020), Khalil-Gorpinich (2012)
-- Mathematical : Jabr-Taylor (2012), Taylor-gurobi (2012), Taylor-pyomo 2012)</p>
-<p>The input is the grid
-The output is the list of disabled lines</p>
-<p>example:
-mst = sp.src(G)
-mst_Prim_edges = mst.Solve(‘Prim’)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.Solve">
-<span class="sig-name descname"><span class="pre">Solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Baran'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_DistributionNetworkReconfiguration.html#DistributionNetworkReconfiguration.Solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.Solve" title="Link to this definition"></a></dt>
-<dd><p>once the class is initialize, the only available function is the Solve function, which obtains the MST based
-on the algorithm given by the argument ‘method’, which is ‘Kruskal’ by default</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GC_DistributionNetworkReconfiguration.html#DistributionNetworkReconfiguration.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#GC_DistributionNetworkReconfiguration.DistributionNetworkReconfiguration.__init__" title="Link to this definition"></a></dt>
-<dd><p>to initialize the class requires the grid format (openDSS, GridCal or PandaPower) and the grid file name</p>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="gc-distributionnetworkreconfiguration-module">
+<h1>GC_DistributionNetworkReconfiguration module<a class="headerlink" href="#gc-distributionnetworkreconfiguration-module" title="Link to this heading"></a></h1>
 </section>
 
 
