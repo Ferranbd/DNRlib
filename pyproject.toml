@@ -35,7 +35,7 @@ dev = [
     "sphinx_rtd_theme", # If you use ReadTheDocs theme for Sphinx
 ]
 
-[project.scripts]
+#[project.scripts]
 #your-cli-command = "your_package_name.your_module:main_function" # If you have a command-line entry point
 
 dependencies = [
