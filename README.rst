@@ -37,6 +37,7 @@ Dependencies [to be updated]
 ------------
 
 Python packages dependencies :
+
 - networkx-3.5
 - numpy-2.3.2
 - pandas-2.2.6
