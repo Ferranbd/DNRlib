@@ -25,7 +25,8 @@ Installation
 
 The module can be installed via pip with the command::
 
-pip install DNRlib   (to be finished)
+- clone or copy the project in your computer and execute "pip install ." from the project root folder
+- pip install DNRlib   (to be finished)
 
 
 Tests [to be implemented]
