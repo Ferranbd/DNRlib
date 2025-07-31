@@ -6,14 +6,14 @@ the initial network using GridCal simulator (accepts Matpower .m files) and call
 
 The Distribution Network Reconfiguration library implements the following papers:
 
-- Baran 1989 (GC_Baran1989.py)
-- Jakus 2020 (GC_Jakus2020.py)
-- Khalil 2012 (GC_Khalil_Gorpinich_2012.py)
-- Merlin 1975 (GC_Merlin1975.py)
-- Morton 2000 (GC_Morton2000.py)
-- Montoya 2012 (MSTgreedy.py - minimum spanning tree)
-- Salkuti 2021 (GC_Salkuti2012.py)
-- Taylor 2012 (GC_Taylor2012_pyomo.py)
+- "Network reconfiguration in distribution systems for loss reduction and load" by Baran and Wu, 1989 (GC_Baran1989.py) : https://ieeexplore-ieee-org.recursos.biblioteca.upc.edu/document/25627
+- "Optimal Reconfiguration of Distribution Networks Using Hybrid Heuristic-Genetic Algorithm" by Jakus et al., 2020 (GC_Jakus2020.py) : https://www.mdpi.com/1996-1073/13/7/1544
+- "Reconfiguration for loss reduction of distribution systems using selective particle swarm optimization" by Khalil and Gorpinich, 2012 (GC_Khalil_Gorpinich_2012.py) : http://www.ijmse.org/Volume3/Issue6/paper4.pdf
+- "Search for a minimal loss operating spanning tree in an urban power distribution system" by Merlin and Back, 1975 (GC_Merlin1975.py) : https://pscc-central.epfl.ch/repo/papers/1975/18.pdf
+- "An efficient brute-force solution to the network reconfiguration problem" by Morton and Mareels, 2000 (GC_Morton2000.py) : https://ieeexplore-ieee-org.recursos.biblioteca.upc.edu/document/871365/
+- "A minimal spanning tree algorithm for distribution networks configuration" by Montoya and Ramirez, 2012 (MSTgreedy.py) : https://ieeexplore-ieee-org.recursos.biblioteca.upc.edu/document/6344718
+- "An effective network reconfiguration approach of radial distribution system for loss minimization and voltage profile improvement" et al. by Salkuti et al., 2021 (GC_Salkuti2012.py)
+- "Convex Models of Distribution System Reconfiguration" by Taylor and Hover, 2012 (GC_Taylor2012_pyomo.py)
 
 There are also two auxiliary files :
 
