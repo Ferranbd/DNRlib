@@ -13,4 +13,4 @@ sphinx_rtd_theme
 rst-to-myst[sphinx]
 myst_parser
 sphinx_autodoc_typehints
-numpydoc==1.9.0
+numpydoc
