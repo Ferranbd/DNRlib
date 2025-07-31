@@ -82,4 +82,7 @@ Example
    radiality = GC_utils.CheckRadialConnectedNetwork(gridGC)
    disabled_lines = dnr.Solve(method="Khalil", NumCandidates=10)
 
+Documentation
+-------------
 
+Detailed functions documentation can be found in https://dnrlib.readthedocs.io/en/latest/
