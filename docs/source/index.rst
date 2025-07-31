@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-DNRlib documentation
-====================
+DNRlib documentation : Distribution Network Reconfiguration (DNR) library
+=========================================================================
 
 Description of the DNRlib, a Python library for learning the basics of Distribution Network Reconfiguration (DNR), by using several methods published in papers from 1975 up to today.
 
