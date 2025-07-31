@@ -16,6 +16,7 @@ The Distribution Network Reconfiguration library implements the following papers
 - Taylor 2012 (GC_Taylor2012_pyomo.py)
 
 There are also two auxiliary files :
+
 - GC_PandaPowerImporter.py : with functions to import PandaPower cases to GridCal, which is necessary for the use of the Simbench timeseries
 - GC_utils.py : basic functions used in more than one file
 
